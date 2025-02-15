@@ -128,13 +128,15 @@ func main() {
 		os.Exit(1)
 	}
 
-	c := client.New(s.Opts.Host, s.Opts.Port, logger, streamOpts1, streamOpts2)
-	if err := c.SetupJetStream(); err != nil {
-		logger.Error("failed setting up jetstream",
-			slog.String("host", s.Opts.Host),
-			slog.Int("port", s.Opts.Port),
-			slog.String("error", err.Error()),
-		)
+	js, err := client.NewJetStreamContext(s.Opts.Host, s.Opts.Port)
+	if err != nil {
+		logger.Error("failed to create jetstream context", "error", err)
+		os.Exit(1)
+	}
+
+	c := client.New(logger, streamOpts1, streamOpts2)
+	if err := c.SetupJetStream(js); err != nil {
+		logger.Error("failed setting up jetstream", "error", err)
 		os.Exit(1)
 	}
 
