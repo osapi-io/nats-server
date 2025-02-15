@@ -41,8 +41,8 @@ func main() {
 		ReadyTimeout: 5 * time.Second,
 	}
 
-	var sm server.Manager = server.New(logger, opts)
-	err := sm.Start()
+	s := server.New(logger, opts)
+	err := s.Start()
 	if err != nil {
 		logger.Error("failed to start server", "error", err)
 		os.Exit(1)
@@ -52,7 +52,7 @@ func main() {
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 	<-quit
 
-	sm.Stop()
+	s.Stop()
 }
 ```
 
