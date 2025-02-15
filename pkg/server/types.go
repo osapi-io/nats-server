@@ -33,7 +33,8 @@ type Server struct {
 	logger     *slog.Logger
 	natsServer *server.Server
 
-	opts *Options
+	// Opts configuration options for the embedded NATS server.
+	Opts *Options
 }
 
 // Options extends natsserver.Options to include custom settings.

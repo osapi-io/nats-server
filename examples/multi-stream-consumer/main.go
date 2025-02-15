@@ -51,7 +51,7 @@ func getLogger(debug bool) *slog.Logger {
 }
 
 func main() {
-	debug := false
+	debug := true
 	trace := debug
 	logger := getLogger(debug)
 
@@ -128,7 +128,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	c := client.New(logger, streamOpts1, streamOpts2)
+	c := client.New(s.Opts.Host, s.Opts.Port, logger, streamOpts1, streamOpts2)
 	if err := c.SetupJetStream(); err != nil {
 		logger.Error("failed setting up JetStream: %w", err)
 		os.Exit(1)

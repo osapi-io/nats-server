@@ -30,17 +30,18 @@ import (
 // New initialize and configure a new Server instance.
 func New(
 	logger *slog.Logger,
+
 	opts *Options,
 ) *Server {
 	return &Server{
 		logger: logger,
-		opts:   opts,
+		Opts:   opts,
 	}
 }
 
 // Start start the embedded NATS server.
 func (s *Server) Start() error {
-	natsServer, err := natsserver.NewServer(s.opts.Options)
+	natsServer, err := natsserver.NewServer(s.Opts.Options)
 	if err != nil {
 		return fmt.Errorf("error starting server: %w", err)
 	}
@@ -48,7 +49,7 @@ func (s *Server) Start() error {
 	go natsServer.Start()
 
 	// Wait for server readiness
-	if !natsServer.ReadyForConnections(s.opts.ReadyTimeout) {
+	if !natsServer.ReadyForConnections(s.Opts.ReadyTimeout) {
 		return fmt.Errorf("server not ready for connections")
 	}
 
