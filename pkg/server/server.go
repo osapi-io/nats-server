@@ -25,32 +25,22 @@ import (
 	"log/slog"
 
 	natsserver "github.com/nats-io/nats-server/v2/server"
-	"github.com/nats-io/nats.go"
 )
 
 // New initialize and configure a new Server instance.
 func New(
 	logger *slog.Logger,
-	options *Options,
-	streamOptions ...*StreamOptions,
+	opts *Options,
 ) *Server {
-	server := &Server{
-		logger:  logger,
-		options: options,
+	return &Server{
+		logger: logger,
+		opts:   opts,
 	}
-
-	if options.JetStream && len(streamOptions) > 0 {
-		server.streamOptions = streamOptions
-	}
-
-	return server
 }
 
 // Start start the embedded NATS server.
 func (s *Server) Start() error {
-	natsOpts := s.options.ToNATSOptions()
-
-	natsServer, err := natsserver.NewServer(natsOpts)
+	natsServer, err := natsserver.NewServer(s.opts.Options)
 	if err != nil {
 		return fmt.Errorf("error starting server: %w", err)
 	}
@@ -58,7 +48,7 @@ func (s *Server) Start() error {
 	go natsServer.Start()
 
 	// Wait for server readiness
-	if !natsServer.ReadyForConnections(s.options.ReadyTimeout) {
+	if !natsServer.ReadyForConnections(s.opts.ReadyTimeout) {
 		return fmt.Errorf("server not ready for connections")
 	}
 
@@ -70,53 +60,7 @@ func (s *Server) Start() error {
 
 	s.logger.Info("nats server started successfully")
 
-	if s.options.JetStream && len(s.streamOptions) > 0 {
-		if err := s.setupJetStream(); err != nil {
-			return fmt.Errorf("error setting up jetstream: %w", err)
-		}
-
-		s.logger.Info("jet stream setup completed successfully")
-	}
-
 	s.natsServer = natsServer
-
-	return nil
-}
-
-// setupJetStream creates the JetStream connection and stream configuration.
-func (s *Server) setupJetStream() error {
-	if len(s.streamOptions) == 0 {
-		return fmt.Errorf("jetstream is enabled but no stream configuration was provided")
-	}
-
-	nc, err := nats.Connect(fmt.Sprintf("nats://%s:%d", s.options.Host, s.options.Port))
-	if err != nil {
-		return fmt.Errorf("error connecting to server: %w", err)
-	}
-	defer nc.Close()
-
-	js, err := nc.JetStream()
-	if err != nil {
-		return fmt.Errorf("error enabling jetstream: %w", err)
-	}
-
-	for _, stream := range s.streamOptions {
-		natsStreamConfig := stream.ToNATS()
-
-		_, err := js.AddStream(natsStreamConfig)
-		if err != nil {
-			return fmt.Errorf("error creating stream %s: %w", stream.Name, err)
-		}
-
-		// Iterate over each consumer tied to the stream
-		for _, consumer := range stream.Consumers {
-			natsConsumerConfig := consumer.ToNATS()
-			_, err := js.AddConsumer(stream.Name, natsConsumerConfig)
-			if err != nil {
-				return fmt.Errorf("error creating consumer for stream %s: %w", stream.Name, err)
-			}
-		}
-	}
 
 	return nil
 }

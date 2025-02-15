@@ -12,31 +12,36 @@ A Go package for running an embedded NATS server.
 See the [examples][] for more uses.
 
 ```golang
+package main
+
+import (
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	natsserver "github.com/nats-io/nats-server/v2/server"
+	"github.com/osapi-io/nats-server/pkg/server"
+)
+
 func main() {
 	debug := true
 	trace := debug
 	logger := getLogger(debug)
 
-	opts := server.NewOptions(
-		server.WithDebug(debug),
-		server.WithTrace(trace),
-		server.WithStoreDir(".nats/jetstream/"),
-		server.WithReadyTimeout(5*time.Second),
-	)
+	opts := &server.Options{
+		Options: &natsserver.Options{
+			JetStream: true,
+			Debug:     debug,
+			Trace:     trace,
+			StoreDir:  ".nats/jetstream/",
+			NoSigs:    true,
+			NoLog:     false,
+		},
+		ReadyTimeout: 5 * time.Second,
+	}
 
-	streamOpts := server.NewStreamOptions(
-		server.WithStreamName("TASKS"),
-		server.WithSubjects("tasks.*"),
-
-		server.WithConsumer(server.NewConsumerOptions(
-			server.WithDurable("osapi"),
-			server.WithAckPolicy(nats.AckExplicitPolicy),
-			server.WithMaxDeliver(5),
-			server.WithAckWait(30*time.Second),
-		)),
-	)
-
-	var sm server.Manager = server.New(logger, opts, streamOpts)
+	var sm server.Manager = server.New(logger, opts)
 	err := sm.Start()
 	if err != nil {
 		logger.Error("failed to start server", "error", err)

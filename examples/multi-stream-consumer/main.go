@@ -28,7 +28,9 @@ import (
 	"time"
 
 	"github.com/lmittmann/tint"
+	natsserver "github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
+	"github.com/osapi-io/nats-client/pkg/client"
 	"github.com/osapi-io/nats-server/pkg/server"
 )
 
@@ -49,57 +51,86 @@ func getLogger(debug bool) *slog.Logger {
 }
 
 func main() {
-	debug := true
+	debug := false
 	trace := debug
 	logger := getLogger(debug)
 
-	opts := server.NewOptions(
-		server.WithDebug(debug),
-		server.WithTrace(trace),
-		server.WithStoreDir(".nats/jetstream/"),
-		server.WithReadyTimeout(5*time.Second),
-	)
+	opts := &server.Options{
+		Options: &natsserver.Options{
+			JetStream: true,
+			Debug:     debug,
+			Trace:     trace,
+			StoreDir:  ".nats/jetstream/",
+			NoSigs:    true,
+			NoLog:     false,
+		},
+		ReadyTimeout: 5 * time.Second,
+	}
 
-	streamOpts1 := server.NewStreamOptions(
-		server.WithStreamName("TASK_QUEUE"),
-		server.WithSubjects("tasks.*"),
-		server.WithConsumer(server.NewConsumerOptions(
-			server.WithDurable("worker1"),
-			server.WithAckPolicy(nats.AckExplicitPolicy),
-			server.WithDeliverPolicy(nats.DeliverNewPolicy),
-			server.WithMaxAckPending(10),
-			server.WithAckWait(30*time.Second),
-		)),
-		server.WithConsumer(server.NewConsumerOptions(
-			server.WithDurable("worker2"),
-			server.WithAckPolicy(nats.AckExplicitPolicy),
-			server.WithDeliverPolicy(nats.DeliverNewPolicy),
-			server.WithMaxAckPending(10),
-			server.WithAckWait(30*time.Second),
-		)),
-	)
+	streamOpts1 := &client.StreamConfig{
+		StreamConfig: &nats.StreamConfig{
+			Name:     "TASK_QUEUE",
+			Subjects: []string{"tasks.*"},
+			Storage:  nats.FileStorage,
+			Replicas: 1,
+		},
+		Consumers: []*client.ConsumerConfig{
+			{
+				ConsumerConfig: &nats.ConsumerConfig{
+					Durable:       "worker1",
+					AckPolicy:     nats.AckExplicitPolicy,
+					MaxAckPending: 10,
+					AckWait:       30 * time.Second,
+				},
+			},
+			{
+				ConsumerConfig: &nats.ConsumerConfig{
+					Durable:       "worker2",
+					AckPolicy:     nats.AckExplicitPolicy,
+					MaxAckPending: 10,
+					AckWait:       30 * time.Second,
+				},
+			},
+		},
+	}
 
-	streamOpts2 := server.NewStreamOptions(
-		server.WithStreamName("STREAM2"),
-		server.WithSubjects("stream2.*"),
-		server.WithConsumer(server.NewConsumerOptions(
-			server.WithDurable("consumer3"),
-			server.WithAckPolicy(nats.AckExplicitPolicy),
-			server.WithMaxDeliver(5),
-			server.WithAckWait(30*time.Second),
-		)),
-		server.WithConsumer(server.NewConsumerOptions(
-			server.WithDurable("consumer4"),
-			server.WithAckPolicy(nats.AckExplicitPolicy),
-			server.WithMaxDeliver(5),
-			server.WithAckWait(30*time.Second),
-		)),
-	)
+	streamOpts2 := &client.StreamConfig{
+		StreamConfig: &nats.StreamConfig{
+			Name:     "STREAM2",
+			Subjects: []string{"stream2.*"},
+			Storage:  nats.FileStorage,
+			Replicas: 1,
+		},
+		Consumers: []*client.ConsumerConfig{
+			{
+				ConsumerConfig: &nats.ConsumerConfig{
+					Durable:    "consumer3",
+					AckPolicy:  nats.AckExplicitPolicy,
+					MaxDeliver: 5,
+					AckWait:    30 * time.Second,
+				},
+			},
+			{
+				ConsumerConfig: &nats.ConsumerConfig{
+					Durable:    "consumer4",
+					AckPolicy:  nats.AckExplicitPolicy,
+					MaxDeliver: 5,
+					AckWait:    30 * time.Second,
+				},
+			},
+		},
+	}
 
-	var sm server.Manager = server.New(logger, opts, streamOpts1, streamOpts2)
+	var sm server.Manager = server.New(logger, opts)
 	err := sm.Start()
 	if err != nil {
 		logger.Error("failed to start server", "error", err)
+		os.Exit(1)
+	}
+
+	var cm client.Manager = client.New(logger, streamOpts1, streamOpts2)
+	if err := cm.SetupJetStream(); err != nil {
+		logger.Error("failed setting up JetStream: %w", err)
 		os.Exit(1)
 	}
 

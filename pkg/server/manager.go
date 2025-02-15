@@ -22,7 +22,7 @@
 
 package server
 
-// Manager responsible for Server operations.
+// Manager defines the interface for managing the lifecycle of an embedded NATS server.
 type Manager interface {
 	// Start starts the server.
 	Start() error

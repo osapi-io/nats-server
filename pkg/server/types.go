@@ -22,15 +22,22 @@ package server
 
 import (
 	"log/slog"
+	"time"
 
 	"github.com/nats-io/nats-server/v2/server"
+	natsserver "github.com/nats-io/nats-server/v2/server"
 )
 
-// Server implementation of the Server's task operations.
+// Server provides an embedded NATS server implementation.
 type Server struct {
 	logger     *slog.Logger
 	natsServer *server.Server
 
-	options       *Options
-	streamOptions []*StreamOptions
+	opts *Options
+}
+
+// Options extends natsserver.Options to include custom settings.
+type Options struct {
+	*natsserver.Options
+	ReadyTimeout time.Duration
 }
