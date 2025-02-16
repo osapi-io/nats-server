@@ -5,3 +5,5 @@ dist/
 .nats/jetstream/
 result.xml
 .task/
+test/example/output.txt
+test/vendor/
