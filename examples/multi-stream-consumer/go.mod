@@ -1,6 +1,6 @@
 module example.com/server
 
-go 1.23
+go 1.24
 
 replace github.com/osapi-io/nats-server => ../../../nats-server/
 
