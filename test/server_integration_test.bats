@@ -21,7 +21,7 @@
 load "libs/common.bash"
 
 setup() {
-	cd ../examples/simple
+	cd ../examples/simple-server
 	start_server
 }
 
