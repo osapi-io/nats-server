@@ -34,10 +34,6 @@ teardown() {
 	PIN=$(date +"%Y%m%d%H%M%S")
 
 	nats sub test-subject --count=1 | grep "PIN: $PIN" &
-	SUB_PID=$!
-
 	nats pub test-subject "PIN: $PIN"
 	[ "$?" -eq 0 ]
-
-	wait $SUB_PID
 }
