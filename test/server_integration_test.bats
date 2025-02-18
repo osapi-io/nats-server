@@ -33,16 +33,11 @@ teardown() {
 @test "publish and subscribe to a test message" {
 	PIN=$(date +"%Y%m%d%H%M%S")
 
-	nats sub test-subject >output.txt &
+	nats sub test-subject --count=1 | grep "PIN: $PIN" &
 	SUB_PID=$!
-	sleep 1
 
 	nats pub test-subject "PIN: $PIN"
-
-	sleep 1
-
-	grep "PIN: $PIN" output.txt
 	[ "$?" -eq 0 ]
 
-	kill $SUB_PID
+	wait $SUB_PID
 }
