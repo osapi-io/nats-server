@@ -1,8 +1,6 @@
 module example.com/server
 
-go 1.23.0
-
-toolchain go1.24.0
+go 1.24.0
 
 replace github.com/osapi-io/nats-server => ../../../nats-server/
 

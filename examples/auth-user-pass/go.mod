@@ -1,6 +1,6 @@
 module example.com/server
 
-go 1.23.0
+go 1.24
 
 toolchain go1.24.0
 
@@ -11,6 +11,8 @@ replace github.com/osapi-io/nats-client => ../../../nats-client/
 require (
 	github.com/lmittmann/tint v1.0.7
 	github.com/nats-io/nats-server/v2 v2.10.25
+	github.com/nats-io/nats.go v1.39.0
+	github.com/osapi-io/nats-client v0.0.0-00010101000000-000000000000
 	github.com/osapi-io/nats-server v0.0.0-00010101000000-000000000000
 )
 

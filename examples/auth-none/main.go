@@ -67,34 +67,28 @@ func main() {
 		ReadyTimeout: 5 * time.Second,
 	}
 
-	streamOpts1 := &client.StreamConfig{
-		StreamConfig: &nats.StreamConfig{
-			Name:     "TASK_QUEUE",
-			Subjects: []string{"tasks.*"},
-			Storage:  nats.FileStorage,
-			Replicas: 1,
-		},
-		Consumers: []*client.ConsumerConfig{
-			{
-				ConsumerConfig: &nats.ConsumerConfig{
-					Durable:       "worker1",
-					AckPolicy:     nats.AckExplicitPolicy,
-					MaxAckPending: 10,
-					AckWait:       30 * time.Second,
-				},
-			},
-			{
-				ConsumerConfig: &nats.ConsumerConfig{
-					Durable:       "worker2",
-					AckPolicy:     nats.AckExplicitPolicy,
-					MaxAckPending: 10,
-					AckWait:       30 * time.Second,
-				},
-			},
+	s := server.New(logger, opts)
+	err := s.Start()
+	if err != nil {
+		logger.Error("failed to start server", "error", err)
+		os.Exit(1)
+	}
+
+	jsOpts := &client.ClientOptions{
+		Host: s.Opts.Host,
+		Port: s.Opts.Port,
+		Auth: client.AuthOptions{
+			AuthType: client.NoAuth,
 		},
 	}
 
-	streamOpts2 := &client.StreamConfig{
+	js, err := client.NewJetStreamContext(jsOpts)
+	if err != nil {
+		logger.Error("failed to create jetstream context", "error", err)
+		os.Exit(1)
+	}
+
+	streamOpts := &client.StreamConfig{
 		StreamConfig: &nats.StreamConfig{
 			Name:     "STREAM2",
 			Subjects: []string{"stream2.*"},
@@ -121,21 +115,8 @@ func main() {
 		},
 	}
 
-	s := server.New(logger, opts)
-	err := s.Start()
-	if err != nil {
-		logger.Error("failed to start server", "error", err)
-		os.Exit(1)
-	}
-
-	js, err := client.NewJetStreamContext(s.Opts.Host, s.Opts.Port)
-	if err != nil {
-		logger.Error("failed to create jetstream context", "error", err)
-		os.Exit(1)
-	}
-
-	c := client.New(logger, streamOpts1, streamOpts2)
-	if err := c.SetupJetStream(js); err != nil {
+	c := client.New(logger)
+	if err := c.SetupJetStream(js, streamOpts); err != nil {
 		logger.Error("failed setting up jetstream", "error", err)
 		os.Exit(1)
 	}

@@ -29,6 +29,8 @@ import (
 
 	"github.com/lmittmann/tint"
 	natsserver "github.com/nats-io/nats-server/v2/server"
+	"github.com/nats-io/nats.go"
+	"github.com/osapi-io/nats-client/pkg/client"
 	"github.com/osapi-io/nats-server/pkg/server"
 )
 
@@ -89,6 +91,55 @@ func main() {
 	err := s.Start()
 	if err != nil {
 		logger.Error("failed to start server", "error", err)
+		os.Exit(1)
+	}
+
+	jsOpts := &client.ClientOptions{
+		Host: s.Opts.Host,
+		Port: s.Opts.Port,
+		Auth: client.AuthOptions{
+			AuthType: client.UserPassAuth,
+			Username: "myuser",
+			Password: "mypassword",
+		},
+	}
+
+	js, err := client.NewJetStreamContext(jsOpts)
+	if err != nil {
+		logger.Error("failed to create jetstream context", "error", err)
+		os.Exit(1)
+	}
+
+	streamOpts := &client.StreamConfig{
+		StreamConfig: &nats.StreamConfig{
+			Name:     "STREAM2",
+			Subjects: []string{"stream2.*"},
+			Storage:  nats.FileStorage,
+			Replicas: 1,
+		},
+		Consumers: []*client.ConsumerConfig{
+			{
+				ConsumerConfig: &nats.ConsumerConfig{
+					Durable:    "consumer3",
+					AckPolicy:  nats.AckExplicitPolicy,
+					MaxDeliver: 5,
+					AckWait:    30 * time.Second,
+				},
+			},
+			{
+				ConsumerConfig: &nats.ConsumerConfig{
+					Durable:    "consumer4",
+					AckPolicy:  nats.AckExplicitPolicy,
+					MaxDeliver: 5,
+					AckWait:    30 * time.Second,
+				},
+			},
+		},
+	}
+
+	c := client.New(logger)
+	if err := c.SetupJetStream(js, streamOpts); err != nil {
+		logger.Error("failed setting up jetstream", "error", err)
 		os.Exit(1)
 	}
 
