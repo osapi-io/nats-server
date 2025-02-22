@@ -27,31 +27,14 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/lmittmann/tint"
 	natsserver "github.com/nats-io/nats-server/v2/server"
 	"github.com/osapi-io/nats-server/pkg/server"
 )
 
-func getLogger(debug bool) *slog.Logger {
-	logLevel := slog.LevelInfo
-	if debug {
-		logLevel = slog.LevelDebug
-	}
-
-	logger := slog.New(
-		tint.NewHandler(os.Stderr, &tint.Options{
-			Level:      logLevel,
-			TimeFormat: time.Kitchen,
-		}),
-	)
-
-	return logger
-}
-
 func main() {
 	debug := true
 	trace := debug
-	logger := getLogger(debug)
+	logger := slog.Default()
 
 	opts := &server.Options{
 		Options: &natsserver.Options{
