@@ -1,6 +1,6 @@
 # Authenticating with a User and Password
 
-An example simple NATS server using [User and Password Auth][].
+An example NATS server using [User and Password Auth][].
 
 ## Usage
 

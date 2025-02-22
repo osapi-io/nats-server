@@ -1,6 +1,6 @@
 # Authenticating with an NKey
 
-An example simple NATS server using [NKey Auth][].
+An example NATS server using [NKey Auth][].
 
 ## Setup
 
@@ -37,6 +37,8 @@ $ PIN=$(date +"%Y%m%d%H%M%S")
 
 $ nats sub test-subject --count=1 --nkey ./.nkeys/service1.nk | grep "PIN: $PIN" &
 $ nats pub test-subject "PIN: $PIN" --nkey ./.nkeys/service1.nk
+
+$ nats pub test-subject "PIN: $PIN" --nkey ./.nkeys/service2.nk # fail
 ```
 
 [NKey Auth]: https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro/nkey_auth
