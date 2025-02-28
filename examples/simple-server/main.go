@@ -41,7 +41,7 @@ func main() {
 			JetStream: true,
 			Debug:     debug,
 			Trace:     trace,
-			StoreDir:  "",
+			StoreDir:  ".nats/jetstream/",
 			NoSigs:    true,
 			NoLog:     false,
 		},

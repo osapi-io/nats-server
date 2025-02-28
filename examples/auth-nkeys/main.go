@@ -34,10 +34,6 @@ func main() {
 	trace := debug
 	logger := slog.Default()
 
-	if debug {
-		logLevel = slog.LevelDebug
-	}
-
 	nkeyUsers := []*natsserver.NkeyUser{
 		{
 			Nkey: "UAZMBGU3ASBL22E5WW6F3EFAW3CNUGGFRRYI6VRPPOHLNCNJZDTXFOPG", // Service 1
