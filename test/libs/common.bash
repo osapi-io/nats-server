@@ -24,7 +24,7 @@ BATS_TEST_TIMEOUT=10
 # Function to start the server
 start_server() {
   run go run ${PROGRAM} server start &
-  sleep 5 # super lame-o
+  sleep 2 # super lame-o
 }
 
 # Function to stop the server

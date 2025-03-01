@@ -34,6 +34,7 @@ teardown() {
 	PIN=$(date +"%Y%m%d%H%M%S")
 
 	nats sub test-subject --count=1 | grep "PIN: $PIN" &
+	sleep 2 # super lame-o
 	nats pub test-subject "PIN: $PIN"
 	[ "$?" -eq 0 ]
 }
