@@ -9,6 +9,8 @@ A Go package for running an embedded NATS server.
 
 ## Usage
 
+https://github.com/osapi-io/nats-server/blob/b542d33de18737037c3e4c6ed8160b27440690fb/examples/auth-none/main.go#L21-L63
+
 See the [examples][] section for additional use cases.
 
 ## Testing
