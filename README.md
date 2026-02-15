@@ -16,36 +16,36 @@ https://github.com/osapi-io/nats-server/blob/b542d33de18737037c3e4c6ed8160b27440
 
 See the [examples][] section for additional use cases.
 
-## Testing
+## Development
 
-Enable [Remote Taskfile][] feature.
+Fetch shared justfiles:
 
 ```bash
-export TASK_X_REMOTE_TASKFILES=1
+just fetch
 ```
 
 Install dependencies:
 
 ```bash
-$ task go:deps
+just deps
 ```
 
-To execute tests:
+Run all tests:
 
 ```bash
-$ task go:test
+just test
 ```
 
 Auto format code:
 
 ```bash
-$ task go:fmt
+just go::fmt
 ```
 
-List helpful targets:
+List available recipes:
 
 ```bash
-$ task
+just --list
 ```
 
 ## License
@@ -53,5 +53,4 @@ $ task
 The [MIT][] License.
 
 [examples]: examples/
-[Remote Taskfile]: https://taskfile.dev/experiments/remote-taskfiles/
 [MIT]: LICENSE
