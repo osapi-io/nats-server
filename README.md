@@ -1,4 +1,5 @@
 [![release](https://img.shields.io/github/release/osapi-io/nats-server.svg?style=for-the-badge)](https://github.com/osapi-io/nats-server/releases/latest)
+[![codecov](https://img.shields.io/codecov/c/github/osapi-io/nats-server?style=for-the-badge)](https://codecov.io/gh/osapi-io/nats-server)
 [![go report card](https://goreportcard.com/badge/github.com/osapi-io/nats-server?style=for-the-badge)](https://goreportcard.com/report/github.com/osapi-io/nats-server)
 [![license](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=for-the-badge)](LICENSE)
 [![build](https://img.shields.io/github/actions/workflow/status/osapi-io/nats-server/go.yml?style=for-the-badge)](https://github.com/osapi-io/nats-server/actions/workflows/go.yml)
