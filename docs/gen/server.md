@@ -10,6 +10,8 @@ Package server provides an embedded NATS server implementation.
 
 ## Index
 
+- [Variables](<#variables>)
+- [type NATSServerInstance](<#NATSServerInstance>)
 - [type Options](<#Options>)
 - [type Server](<#Server>)
   - [func New\(logger \*slog.Logger, opts \*Options\) \*Server](<#New>)
@@ -24,8 +26,34 @@ Package server provides an embedded NATS server implementation.
   - [func \(l \*SlogWrapper\) Warnf\(format string, v ...interface\{\}\)](<#SlogWrapper.Warnf>)
 
 
+## Variables
+
+<a name="NewNATSServer"></a>NewNATSServer is a public variable function wrapping natsserver.NewServer.
+
+```go
+var NewNATSServer = func(
+    opts *natsserver.Options,
+) (NATSServerInstance, error) {
+    return natsserver.NewServer(opts)
+}
+```
+
+<a name="NATSServerInstance"></a>
+## type [NATSServerInstance](<https://github.com/osapi-io/nats-server/blob/main/pkg/server/types.go#L32-L37>)
+
+NATSServerInstance defines an interface for the NATS server operations used by Start\(\) and Stop\(\).
+
+```go
+type NATSServerInstance interface {
+    Start()
+    ReadyForConnections(timeout time.Duration) bool
+    SetLogger(logger natsserver.Logger, debug, trace bool)
+    Shutdown()
+}
+```
+
 <a name="Options"></a>
-## type [Options](<https://github.com/osapi-io/nats-server/blob/main/pkg/server/types.go#L40-L43>)
+## type [Options](<https://github.com/osapi-io/nats-server/blob/main/pkg/server/types.go#L49-L52>)
 
 Options extends natsserver.Options to include custom settings.
 
@@ -37,7 +65,7 @@ type Options struct {
 ```
 
 <a name="Server"></a>
-## type [Server](<https://github.com/osapi-io/nats-server/blob/main/pkg/server/types.go#L31-L37>)
+## type [Server](<https://github.com/osapi-io/nats-server/blob/main/pkg/server/types.go#L40-L46>)
 
 Server provides an embedded NATS server implementation.
 
@@ -51,7 +79,7 @@ type Server struct {
 ```
 
 <a name="New"></a>
-### func [New](<https://github.com/osapi-io/nats-server/blob/main/pkg/server/server.go#L32-L36>)
+### func [New](<https://github.com/osapi-io/nats-server/blob/main/pkg/server/server.go#L30-L34>)
 
 ```go
 func New(logger *slog.Logger, opts *Options) *Server
@@ -60,7 +88,7 @@ func New(logger *slog.Logger, opts *Options) *Server
 New initialize and configure a new Server instance.
 
 <a name="Server.Start"></a>
-### func \(\*Server\) [Start](<https://github.com/osapi-io/nats-server/blob/main/pkg/server/server.go#L44>)
+### func \(\*Server\) [Start](<https://github.com/osapi-io/nats-server/blob/main/pkg/server/server.go#L42>)
 
 ```go
 func (s *Server) Start() error
@@ -69,7 +97,7 @@ func (s *Server) Start() error
 Start start the embedded NATS server.
 
 <a name="Server.Stop"></a>
-### func \(\*Server\) [Stop](<https://github.com/osapi-io/nats-server/blob/main/pkg/server/server.go#L71>)
+### func \(\*Server\) [Stop](<https://github.com/osapi-io/nats-server/blob/main/pkg/server/server.go#L69>)
 
 ```go
 func (s *Server) Stop()
