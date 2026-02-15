@@ -6,18 +6,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A Go package for running an embedded NATS server. Provides server lifecycle management, slog-based logging integration, and configurable options. Used by osapi-io projects (linked via `replace` in consuming project's `go.mod`).
 
-## Development Commands
+## Development Reference
+
+For setup, prerequisites, and contributing guidelines:
+
+- @docs/development.md - Prerequisites, setup, code style, testing, commits
+- @docs/contributing.md - PR workflow and contribution guidelines
+
+## Quick Reference
 
 ```bash
-just fetch             # Fetch shared justfiles (run once or to update)
-just deps              # Install all dependencies
-just test              # Run all tests (lint + unit + coverage)
-just go::unit          # Run unit tests only
-just go::vet           # Run golangci-lint
-just go::fmt           # Auto-format (gofumpt + golines)
-just go::fmt-check     # Check formatting without modifying
-just go::unit-cov      # Generate coverage report
-go test -run TestName -v ./pkg/server/...  # Run a single test
+just fetch / just deps / just test / just go::unit / just go::vet / just go::fmt
 ```
 
 ## Package Structure
