@@ -16,6 +16,10 @@ https://github.com/osapi-io/nats-server/blob/b542d33de18737037c3e4c6ed8160b27440
 
 See the [examples][] section for additional use cases.
 
+## Documentation
+
+See the [generated documentation][] for details on available packages and functions.
+
 ## Development
 
 Fetch shared justfiles:
@@ -53,4 +57,5 @@ just --list
 The [MIT][] License.
 
 [examples]: examples/
+[generated documentation]: docs/gen/
 [MIT]: LICENSE
