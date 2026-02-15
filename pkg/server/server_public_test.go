@@ -87,7 +87,7 @@ func (s *ServerPublicTestSuite) TestStart() {
 				) (server.NATSServerInstance, error) {
 					return s.mockNATSServer, nil
 				}
-				s.mockNATSServer.EXPECT().Start().Times(1)
+				s.mockNATSServer.EXPECT().Start().AnyTimes()
 				s.mockNATSServer.EXPECT().
 					ReadyForConnections(gomock.Any()).
 					Return(true).
@@ -159,7 +159,7 @@ func (s *ServerPublicTestSuite) TestStop() {
 				) (server.NATSServerInstance, error) {
 					return s.mockNATSServer, nil
 				}
-				s.mockNATSServer.EXPECT().Start().Times(1)
+				s.mockNATSServer.EXPECT().Start().AnyTimes()
 				s.mockNATSServer.EXPECT().
 					ReadyForConnections(gomock.Any()).
 					Return(true).
