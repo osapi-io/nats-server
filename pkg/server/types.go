@@ -27,15 +27,6 @@ import (
 	natsserver "github.com/nats-io/nats-server/v2/server"
 )
 
-// NATSServerInstance defines an interface for the NATS server operations
-// used by Start() and Stop().
-type NATSServerInstance interface {
-	Start()
-	ReadyForConnections(timeout time.Duration) bool
-	SetLogger(logger natsserver.Logger, debug, trace bool)
-	Shutdown()
-}
-
 // Server provides an embedded NATS server implementation.
 type Server struct {
 	logger     *slog.Logger
