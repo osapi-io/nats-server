@@ -1,4 +1,4 @@
-// Copyright (c) 2025 John Dewey
+// Copyright (c) 2026 John Dewey
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to
@@ -18,35 +18,7 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-package server
+// Package mocks provides generated mock implementations for testing.
+package mocks
 
-import (
-	"log/slog"
-	"time"
-
-	natsserver "github.com/nats-io/nats-server/v2/server"
-)
-
-// NATSServerInstance defines an interface for the NATS server operations
-// used by Start() and Stop().
-type NATSServerInstance interface {
-	Start()
-	ReadyForConnections(timeout time.Duration) bool
-	SetLogger(logger natsserver.Logger, debug, trace bool)
-	Shutdown()
-}
-
-// Server provides an embedded NATS server implementation.
-type Server struct {
-	logger     *slog.Logger
-	natsServer NATSServerInstance
-
-	// Opts configuration options for the embedded NATS server.
-	Opts *Options
-}
-
-// Options extends natsserver.Options to include custom settings.
-type Options struct {
-	*natsserver.Options
-	ReadyTimeout time.Duration
-}
+//go:generate go tool github.com/golang/mock/mockgen -destination=./nats_server_instance.gen.go -package=mocks github.com/osapi-io/nats-server/pkg/server NATSServerInstance
