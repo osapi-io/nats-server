@@ -16,7 +16,11 @@ updates:
       prefix: chore
 
   - package-ecosystem: "gomod"
-    directory: "examples/go-client/"
+    directories:
+      - "examples/auth-nkeys"
+      - "examples/auth-none"
+      - "examples/auth-user-pass"
+      - "examples/simple-server"
     schedule:
       interval: "daily"
     commit-message:
