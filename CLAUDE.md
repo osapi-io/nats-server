@@ -45,6 +45,8 @@ func FunctionName(
 
 - Public tests: `*_public_test.go` in test package (`package server_test`) for exported functions
 - Internal tests: `*_test.go` in same package (`package server`) for private functions
+- Suite naming: `*_public_test.go` → `{Name}PublicTestSuite`,
+  `*_test.go` → `{Name}TestSuite`
 - Use `testify/suite` with table-driven patterns
 - Use `golang/mock` for mocking interfaces
 
