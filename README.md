@@ -13,26 +13,47 @@
 
 A Go package for running an embedded NATS server.
 
-## Usage
+## 📦 Install
 
-https://github.com/osapi-io/nats-server/blob/b542d33de18737037c3e4c6ed8160b27440690fb/examples/auth-none/main.go#L21-L63
+```bash
+go get github.com/osapi-io/nats-server
+```
 
-See the [examples][] section for additional use cases.
+## ✨ Features
 
-## Documentation
+See the [server docs](docs/server/README.md) for quick start, authentication,
+and per-feature reference.
 
-See the [generated documentation][] for details on available packages and functions.
+| Feature              | Description                                               | Docs                                       | Source                                    |
+| -------------------- | --------------------------------------------------------- | ------------------------------------------ | ----------------------------------------- |
+| Lifecycle management | Non-blocking `Start()` / graceful `Stop()` with readiness | [docs](docs/server/lifecycle.md)           | [`server.go`](pkg/server/server.go)       |
+| slog integration     | Adapts `slog.Logger` to the NATS server logging interface | [docs](docs/server/logging.md)             | [`logger.go`](pkg/server/logger.go)       |
+| Configuration        | Options for host, port, store dir, auth, and timeouts     | [docs](docs/server/configuration.md)       | [`types.go`](pkg/server/types.go)         |
 
-## Contributing
+## 📋 Examples
+
+Each example is a standalone Go program you can read and run.
+
+| Example                                          | What it shows                            |
+| ------------------------------------------------ | ---------------------------------------- |
+| [auth-none](examples/auth-none/main.go)         | Start a server without authentication    |
+| [auth-user-pass](examples/auth-user-pass/main.go) | Server with username/password auth     |
+| [auth-nkeys](examples/auth-nkeys/main.go)       | Server with NKey authentication          |
+| [simple-server](examples/simple-server/main.go) | Minimal server startup and shutdown      |
+
+## 📖 Documentation
+
+See the [generated documentation][] for package-level API details.
+
+## 🤝 Contributing
 
 See the [Development](docs/development.md) guide for prerequisites, setup,
 and conventions. See the [Contributing](docs/contributing.md) guide before
 submitting a PR.
 
-## License
+## 📄 License
 
 The [MIT][] License.
 
-[examples]: examples/
 [generated documentation]: docs/gen/
 [MIT]: LICENSE
