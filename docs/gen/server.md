@@ -39,7 +39,7 @@ var NewNATSServer = func(
 ```
 
 <a name="NATSServerInstance"></a>
-## type [NATSServerInstance](<https://github.com/osapi-io/nats-server/blob/main/pkg/server/types.go#L32-L37>)
+## type [NATSServerInstance](<https://github.com/osapi-io/nats-server/blob/main/pkg/server/server_wrapper.go#L31-L36>)
 
 NATSServerInstance defines an interface for the NATS server operations used by Start\(\) and Stop\(\).
 
@@ -53,7 +53,7 @@ type NATSServerInstance interface {
 ```
 
 <a name="Options"></a>
-## type [Options](<https://github.com/osapi-io/nats-server/blob/main/pkg/server/types.go#L49-L52>)
+## type [Options](<https://github.com/osapi-io/nats-server/blob/main/pkg/server/types.go#L40-L43>)
 
 Options extends natsserver.Options to include custom settings.
 
@@ -65,7 +65,7 @@ type Options struct {
 ```
 
 <a name="Server"></a>
-## type [Server](<https://github.com/osapi-io/nats-server/blob/main/pkg/server/types.go#L40-L46>)
+## type [Server](<https://github.com/osapi-io/nats-server/blob/main/pkg/server/types.go#L31-L37>)
 
 Server provides an embedded NATS server implementation.
 
