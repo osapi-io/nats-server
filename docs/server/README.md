@@ -25,18 +25,18 @@ defer s.Stop()
 
 ## Features
 
-| Feature                                   | Description                                   | Source               |
-| ----------------------------------------- | --------------------------------------------- | -------------------- |
-| [`Lifecycle`](lifecycle.md)               | Non-blocking Start/Stop with readiness check  | `server.go`          |
-| [`Logging`](logging.md)                   | slog adapter for the NATS Logger interface    | `logger.go`          |
-| [`Configuration`](configuration.md)       | Options struct extending nats-server options   | `types.go`           |
+| Feature                             | Description                                  | Source      |
+| ----------------------------------- | -------------------------------------------- | ----------- |
+| [`Lifecycle`](lifecycle.md)         | Non-blocking Start/Stop with readiness check | `server.go` |
+| [`Logging`](logging.md)             | slog adapter for the NATS Logger interface   | `logger.go` |
+| [`Configuration`](configuration.md) | Options struct extending nats-server options | `types.go`  |
 
 ## Authentication
 
 Pass authentication options through `natsserver.Options`:
 
-| Type          | Description                  | Options field    |
-| ------------- | ---------------------------- | ---------------- |
-| No auth       | Accept all connections       | (default)        |
-| Username/pass | List of user credentials     | `Users`          |
-| NKey          | List of public NKeys         | `Nkeys`          |
+| Type          | Description              | Options field |
+| ------------- | ------------------------ | ------------- |
+| No auth       | Accept all connections   | (default)     |
+| Username/pass | List of user credentials | `Users`       |
+| NKey          | List of public NKeys     | `Nkeys`       |
