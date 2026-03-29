@@ -13,6 +13,9 @@ mise install
 
 - **[Go][]** — nats-server is written in Go. We always support the latest two
   major Go versions, so make sure your version is recent enough.
+- **[Node.js][]** — Required as a runtime for documentation tooling.
+- **[Bun][]** — JavaScript package manager used for Prettier and documentation
+  formatting.
 - **[just][]** — Task runner used for building, testing, formatting, and other
   development workflows. Install with `brew install just`.
 
@@ -42,6 +45,8 @@ just deps
 
 ## Code style
 
+### Go
+
 Go code should be formatted by [`gofumpt`][gofumpt] and linted using
 [`golangci-lint`][golangci-lint]. This style is enforced by CI.
 
@@ -49,6 +54,16 @@ Go code should be formatted by [`gofumpt`][gofumpt] and linted using
 just go::fmt-check   # Check formatting
 just go::fmt         # Auto-fix formatting
 just go::vet         # Run linter
+```
+
+### Documentation
+
+Markdown files are formatted with [Prettier][prettier] via Bun. This style is
+enforced by CI.
+
+```bash
+just docs::fmt-check   # Check formatting
+just docs::fmt         # Auto-fix formatting
 ```
 
 ## Testing
@@ -68,8 +83,8 @@ go test -run TestName -v ./pkg/server/...  # Run a single test
   functions.
 - Use `testify/suite` with table-driven patterns.
 - **One suite method per function under test.** All scenarios for a function
-  (success, error codes, transport failures, nil responses) belong as rows in
-  a single table — never split into separate `TestFoo`, `TestFooError`,
+  (success, error codes, transport failures, nil responses) belong as rows in a
+  single table — never split into separate `TestFoo`, `TestFooError`,
   `TestFooNilResponse` methods.
 - Use `golang/mock` for mocking interfaces.
 
@@ -79,14 +94,14 @@ Run `just ready` before committing to ensure generated code, package docs,
 formatting, and lint are all up to date:
 
 ```bash
-just ready   # go::generate, go::docs, go::fmt, go::vet
+just ready   # go::generate, docs::fmt, go::docs, go::fmt, go::vet
 ```
 
 ## Branching
 
-All changes should be developed on feature branches. Create a branch from
-`main` using the naming convention `type/short-description`, where `type`
-matches the [Conventional Commits][] type:
+All changes should be developed on feature branches. Create a branch from `main`
+using the naming convention `type/short-description`, where `type` matches the
+[Conventional Commits][] type:
 
 - `feat/add-retry-logic`
 - `fix/null-pointer-crash`
@@ -104,8 +119,7 @@ Follow [Conventional Commits][] with the 50/72 rule:
 - **Subject line**: max 50 characters, imperative mood, capitalized, no period
 - **Body**: wrap at 72 characters, separated from subject by a blank line
 - **Format**: `type(scope): description`
-- **Types**: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`,
-  `chore`
+- **Types**: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`
 - Summarize the "what" and "why", not the "how"
 
 Try to write meaningful commit messages and avoid having too many commits on a
@@ -118,4 +132,7 @@ be reasonable to split it in a few). Git squash and rebase is your friend!
 [Claude Code]: https://claude.ai/code
 [gofumpt]: https://github.com/mvdan/gofumpt
 [golangci-lint]: https://golangci-lint.run
+[prettier]: https://prettier.io
+[Node.js]: https://nodejs.org
+[Bun]: https://bun.sh
 [Conventional Commits]: https://www.conventionalcommits.org

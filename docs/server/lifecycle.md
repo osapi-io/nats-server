@@ -4,10 +4,10 @@ Non-blocking server startup with graceful shutdown.
 
 ## Methods
 
-| Method    | Description                                                  |
-| --------- | ------------------------------------------------------------ |
-| `Start()` | Start the embedded NATS server, wait for readiness           |
-| `Stop()`  | Gracefully shut down the NATS server                         |
+| Method    | Description                                        |
+| --------- | -------------------------------------------------- |
+| `Start()` | Start the embedded NATS server, wait for readiness |
+| `Stop()`  | Gracefully shut down the NATS server               |
 
 ## Usage
 
@@ -28,7 +28,6 @@ if err := s.Start(); err != nil {
 defer s.Stop()
 ```
 
-`Start()` launches the NATS server in a goroutine, waits for it to be ready
-for connections (up to `ReadyTimeout`), then configures slog-based logging.
-`Stop()` calls `Shutdown()` on the underlying NATS server for graceful
-cleanup.
+`Start()` launches the NATS server in a goroutine, waits for it to be ready for
+connections (up to `ReadyTimeout`), then configures slog-based logging. `Stop()`
+calls `Shutdown()` on the underlying NATS server for graceful cleanup.
