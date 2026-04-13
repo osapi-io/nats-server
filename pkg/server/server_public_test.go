@@ -27,9 +27,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
 	natsserver "github.com/nats-io/nats-server/v2/server"
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/mock/gomock"
 
 	"github.com/osapi-io/nats-server/pkg/server"
 	"github.com/osapi-io/nats-server/pkg/server/mocks"

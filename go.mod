@@ -3,9 +3,9 @@ module github.com/osapi-io/nats-server
 go 1.25.0
 
 require (
-	github.com/golang/mock v1.6.0
 	github.com/nats-io/nats-server/v2 v2.12.6
 	github.com/stretchr/testify v1.11.1
+	go.uber.org/mock v0.6.0
 )
 
 require (
@@ -257,9 +257,9 @@ require (
 
 tool (
 	github.com/boumenot/gocover-cobertura
-	github.com/golang/mock/mockgen
 	github.com/golangci/golangci-lint/v2/cmd/golangci-lint
 	github.com/nats-io/natscli/nats
 	github.com/segmentio/golines
+	go.uber.org/mock/mockgen
 	mvdan.cc/gofumpt
 )
