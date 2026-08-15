@@ -25,26 +25,26 @@ go get github.com/osapi-io/nats-server
 See the [server docs](docs/server/README.md) for quick start, authentication,
 and per-feature reference.
 
-| Feature              | Description                                               | Docs                                       | Source                                    |
-| -------------------- | --------------------------------------------------------- | ------------------------------------------ | ----------------------------------------- |
-| Lifecycle management | Non-blocking `Start()` / graceful `Stop()` with readiness | [docs](docs/server/lifecycle.md)           | [`server.go`](pkg/server/server.go)       |
-| slog integration     | Adapts `slog.Logger` to the NATS server logging interface | [docs](docs/server/logging.md)             | [`logger.go`](pkg/server/logger.go)       |
-| Configuration        | Options for host, port, store dir, auth, and timeouts     | [docs](docs/server/configuration.md)       | [`types.go`](pkg/server/types.go)         |
+| Feature              | Description                                               | Docs                                 | Source                              |
+| -------------------- | --------------------------------------------------------- | ------------------------------------ | ----------------------------------- |
+| Lifecycle management | Non-blocking `Start()` / graceful `Stop()` with readiness | [docs](docs/server/lifecycle.md)     | [`server.go`](pkg/server/server.go) |
+| slog integration     | Adapts `slog.Logger` to the NATS server logging interface | [docs](docs/server/logging.md)       | [`logger.go`](pkg/server/logger.go) |
+| Configuration        | Options for host, port, store dir, auth, and timeouts     | [docs](docs/server/configuration.md) | [`types.go`](pkg/server/types.go)   |
 
 ## 📋 Examples
 
 Each example is a standalone Go program you can read and run.
 
-| Example                                          | What it shows                            |
-| ------------------------------------------------ | ---------------------------------------- |
-| [auth-none](examples/auth-none/main.go)         | Start a server without authentication    |
-| [auth-user-pass](examples/auth-user-pass/main.go) | Server with username/password auth     |
-| [auth-nkeys](examples/auth-nkeys/main.go)       | Server with NKey authentication          |
-| [simple-server](examples/simple-server/main.go) | Minimal server startup and shutdown      |
+| Example                                           | What it shows                         |
+| ------------------------------------------------- | ------------------------------------- |
+| [auth-none](examples/auth-none/main.go)           | Start a server without authentication |
+| [auth-user-pass](examples/auth-user-pass/main.go) | Server with username/password auth    |
+| [auth-nkeys](examples/auth-nkeys/main.go)         | Server with NKey authentication       |
+| [simple-server](examples/simple-server/main.go)   | Minimal server startup and shutdown   |
 
 ## 📖 Documentation
 
-See the [package documentation][] on pkg.go.dev for API details.
+See the [package documentation] on pkg.go.dev for API details.
 
 ## 🤝 Contributing
 
@@ -53,7 +53,7 @@ conventions, and the PR workflow.
 
 ## 📄 License
 
-The [MIT][] License.
+The [MIT] License.
 
+[mit]: LICENSE
 [package documentation]: https://pkg.go.dev/github.com/osapi-io/nats-server/pkg/server
-[MIT]: LICENSE

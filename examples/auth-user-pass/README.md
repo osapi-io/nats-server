@@ -1,6 +1,6 @@
 # Authenticating with a User and Password
 
-An example NATS server using [User and Password Auth][].
+An example NATS server using [User and Password Auth].
 
 ## Usage
 
@@ -25,4 +25,4 @@ $ nats sub test-subject --count=1 --user myuser --password mypassword | grep "PI
 $ nats pub test-subject "PIN: $PIN" --user myuser --password mypassword
 ```
 
-[User and Password Auth]: https://docs.nats.io/using-nats/developer/connecting/userpass
+[user and password auth]: https://docs.nats.io/using-nats/developer/connecting/userpass
