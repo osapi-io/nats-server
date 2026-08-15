@@ -1,6 +1,6 @@
 # Authenticating with an NKey
 
-An example NATS server using [NKey Auth][].
+An example NATS server using [NKey Auth].
 
 ## Setup
 
@@ -26,9 +26,9 @@ $ nats server info --user system --password systempassword
 ```
 
 > **Important:** This will only work if a **system account is configured** in
-  the NATS server. Without a properly configured system account, system-level
-  queries like `nats server info` will not be available, even when using NKEYS
-  authentication.
+> the NATS server. Without a properly configured system account, system-level
+> queries like `nats server info` will not be available, even when using NKEYS
+> authentication.
 
 Subscribe and Publish a message:
 
@@ -41,4 +41,4 @@ $ nats pub test-subject "PIN: $PIN" --nkey ./.nkeys/service1.nk
 $ nats pub test-subject "PIN: $PIN" --nkey ./.nkeys/service2.nk # fail
 ```
 
-[NKey Auth]: https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro/nkey_auth
+[nkey auth]: https://docs.nats.io/running-a-nats-service/configuration/securing_nats/auth_intro/nkey_auth
