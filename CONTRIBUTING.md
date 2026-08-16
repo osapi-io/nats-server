@@ -58,10 +58,14 @@ just deps
 
 ## Code style
 
-### Go
+These conventions are shared across every Go repository in the organization and
+are specified in the `go-code-standards` capability in
+[osapi-io/specs](https://github.com/osapi-io/specs). They are restated here
+because a contributor should not have to read another repository to learn how to
+write code in this one. Where the two disagree, the specification wins.
 
-Go code should be formatted by [gofumpt] and linted using [golangci-lint]. This
-style is enforced by CI.
+Go code is formatted by [gofumpt] and linted using [golangci-lint], enforced by
+CI.
 
 ```bash
 just go-fmt-check   # Check formatting
@@ -75,7 +79,7 @@ from formatting.
 
 ### Function signatures
 
-Functions with parameters MUST use multi-line format:
+Functions with parameters use multi-line format, one parameter per line:
 
 ```go
 func FunctionName(
@@ -85,14 +89,14 @@ func FunctionName(
 }
 ```
 
+Zero-parameter functions stay on one line.
+
 ### Go patterns
 
 - Error wrapping: `fmt.Errorf("context: %w", err)`
 - Early returns over nested if-else
 - Unused parameters: rename to `_`
 - Import order: stdlib, third-party, local (blank-line separated)
-- Avoid generic file names like `helpers.go` or `utils.go` — name files after
-  what they contain
 
 ### Documentation
 
@@ -125,18 +129,17 @@ module — change both together.
 
 ### Test file conventions
 
-- Public tests: `*_public_test.go` in test package (`package server_test`) for
-  exported functions.
-- Internal tests: `*_test.go` in the same package (`package server`) for private
-  functions.
+- Public tests: `*_public_test.go` in `package server_test`, exercising the
+  exported surface. This is the default.
+- Internal tests: `*_test.go` in `package server`, for what the exported surface
+  cannot reach.
 - Suite naming: `*_public_test.go` → `{Name}PublicTestSuite`, `*_test.go` →
   `{Name}TestSuite`.
-- Use `testify/suite` with table-driven patterns and `validateFunc` callbacks.
-- **One suite method per function under test.** All scenarios for a function
-  (success, error codes, transport failures, nil responses) belong as rows in a
-  single table — never split into separate `TestFoo`, `TestFooError`,
-  `TestFooNilResponse` methods.
-- Use `go.uber.org/mock` for mocking interfaces.
+- `testify/suite` with table-driven cases and `validateFunc` callbacks.
+- One suite method per function under test — all scenarios for a function
+  (success, error codes, transport failures, nil responses) are rows in one
+  table, never separate `TestFoo` / `TestFooError` methods.
+- Mocks are generated with `go.uber.org/mock` and committed; never hand-written.
 
 ## Before committing
 
@@ -211,8 +214,6 @@ If you have questions, feel free to open a [Discussion] on GitHub.
 [conventional commits]: https://www.conventionalcommits.org
 [discussion]: https://github.com/osapi-io/nats-server/discussions
 [go]: https://go.dev
-[gofumpt]: https://github.com/mvdan/gofumpt
-[golangci-lint]: https://golangci-lint.run
 [just]: https://just.systems
 [mdformat]: https://pypi.org/project/mdformat/
 [mise]: https://mise.jdx.dev
