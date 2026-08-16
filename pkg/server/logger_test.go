@@ -28,6 +28,9 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+// testHandler is a slog.Handler recording the records written to it. It is
+// hand-written rather than generated because slog.Handler is a standard
+// library interface, which does not change when this package does.
 type testHandler struct {
 	records []slog.Record
 }
