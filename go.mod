@@ -1,9 +1,9 @@
 module github.com/osapi-io/nats-server
 
-go 1.25.0
+go 1.26.0
 
 require (
-	github.com/nats-io/nats-server/v2 v2.14.5
+	github.com/nats-io/nats-server/v2 v2.14.6
 	github.com/stretchr/testify v1.12.1
 	go.uber.org/mock v0.6.0
 )
