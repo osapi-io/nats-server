@@ -38,7 +38,7 @@ type SlogWrapper struct {
 // Noticef logs a formatted notice message.
 func (l *SlogWrapper) Noticef(
 	format string,
-	v ...interface{},
+	v ...any,
 ) {
 	l.logger.Info(fmt.Sprintf(format, v...))
 }
@@ -46,7 +46,7 @@ func (l *SlogWrapper) Noticef(
 // Warnf logs a formatted warning message.
 func (l *SlogWrapper) Warnf(
 	format string,
-	v ...interface{},
+	v ...any,
 ) {
 	l.logger.Warn(fmt.Sprintf(format, v...))
 }
@@ -54,7 +54,7 @@ func (l *SlogWrapper) Warnf(
 // Fatalf logs a formatted fatal error message.
 func (l *SlogWrapper) Fatalf(
 	format string,
-	v ...interface{},
+	v ...any,
 ) {
 	l.logger.Error(fmt.Sprintf(format, v...))
 }
@@ -62,7 +62,7 @@ func (l *SlogWrapper) Fatalf(
 // Errorf logs a formatted error message.
 func (l *SlogWrapper) Errorf(
 	format string,
-	v ...interface{},
+	v ...any,
 ) {
 	l.logger.Error(fmt.Sprintf(format, v...))
 }
@@ -70,7 +70,7 @@ func (l *SlogWrapper) Errorf(
 // Debugf logs a formatted debug message.
 func (l *SlogWrapper) Debugf(
 	format string,
-	v ...interface{},
+	v ...any,
 ) {
 	l.logger.Debug(fmt.Sprintf(format, v...))
 }
@@ -78,7 +78,7 @@ func (l *SlogWrapper) Debugf(
 // Tracef logs a formatted trace message (NATS requires this for tracing).
 func (l *SlogWrapper) Tracef(
 	format string,
-	v ...interface{},
+	v ...any,
 ) {
 	l.logger.Debug(fmt.Sprintf(format, v...)) // Map Trace to Debug in slog
 }

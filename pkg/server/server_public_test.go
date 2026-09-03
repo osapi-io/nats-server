@@ -35,6 +35,13 @@ import (
 	"github.com/osapi-io/nats-server/pkg/server/mocks"
 )
 
+const (
+	// The port NATS listens on by default.
+	testPort = 4222
+	// Long enough that a slow machine does not fail the suite.
+	testReadyTimeout = 10 * time.Second
+)
+
 type ServerPublicTestSuite struct {
 	suite.Suite
 
@@ -64,8 +71,8 @@ func (s *ServerPublicTestSuite) TearDownTest() {
 
 func (s *ServerPublicTestSuite) TestNew() {
 	opts := &server.Options{
-		Options:      &natsserver.Options{Host: "localhost", Port: 4222},
-		ReadyTimeout: 10 * time.Second,
+		Options:      &natsserver.Options{Host: "localhost", Port: testPort},
+		ReadyTimeout: testReadyTimeout,
 	}
 	srv := server.New(s.logger, opts)
 

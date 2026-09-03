@@ -31,11 +31,19 @@ import (
 // testHandler is a slog.Handler recording the records written to it. It is
 // hand-written rather than generated because slog.Handler is a standard
 // library interface, which does not change when this package does.
+// The format and argument every wrapper method is exercised with. The
+// assertions check what reaches the handler, not what was passed in, so one
+// pair serves all six.
+const (
+	testFormat = "hello %s"
+	testArg    = "world"
+)
+
 type testHandler struct {
 	records []slog.Record
 }
 
-func (h *testHandler) Enabled(
+func (*testHandler) Enabled(
 	_ context.Context,
 	_ slog.Level,
 ) bool {
@@ -89,42 +97,42 @@ func (s *SlogWrapperTestSuite) TestLogMethods() {
 		{
 			name: "Noticef logs at Info level",
 			call: func() {
-				s.wrapper.Noticef("hello %s", "world")
+				s.wrapper.Noticef(testFormat, testArg)
 			},
 			expectedLevel: slog.LevelInfo,
 		},
 		{
 			name: "Warnf logs at Warn level",
 			call: func() {
-				s.wrapper.Warnf("hello %s", "world")
+				s.wrapper.Warnf(testFormat, testArg)
 			},
 			expectedLevel: slog.LevelWarn,
 		},
 		{
 			name: "Fatalf logs at Error level",
 			call: func() {
-				s.wrapper.Fatalf("hello %s", "world")
+				s.wrapper.Fatalf(testFormat, testArg)
 			},
 			expectedLevel: slog.LevelError,
 		},
 		{
 			name: "Errorf logs at Error level",
 			call: func() {
-				s.wrapper.Errorf("hello %s", "world")
+				s.wrapper.Errorf(testFormat, testArg)
 			},
 			expectedLevel: slog.LevelError,
 		},
 		{
 			name: "Debugf logs at Debug level",
 			call: func() {
-				s.wrapper.Debugf("hello %s", "world")
+				s.wrapper.Debugf(testFormat, testArg)
 			},
 			expectedLevel: slog.LevelDebug,
 		},
 		{
 			name: "Tracef logs at Debug level",
 			call: func() {
-				s.wrapper.Tracef("hello %s", "world")
+				s.wrapper.Tracef(testFormat, testArg)
 			},
 			expectedLevel: slog.LevelDebug,
 		},

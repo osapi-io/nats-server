@@ -22,6 +22,7 @@
 package server
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 )
@@ -49,7 +50,7 @@ func (s *Server) Start() error {
 
 	// Wait for server readiness
 	if !natsServer.ReadyForConnections(s.Opts.ReadyTimeout) {
-		return fmt.Errorf("server not ready for connections")
+		return errors.New("server not ready for connections")
 	}
 
 	slogWrapper := &SlogWrapper{
