@@ -1,4 +1,4 @@
-# Authenticating with a User and Password
+# Authenticating with a user and password
 
 An example NATS server using [User and Password Auth].
 

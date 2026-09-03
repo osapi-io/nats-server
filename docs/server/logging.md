@@ -1,4 +1,4 @@
-# slog Integration
+# slog integration
 
 Adapts Go's `slog.Logger` to the NATS server `Logger` interface, bridging
 structured logging with NATS's printf-style log calls.

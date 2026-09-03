@@ -10,17 +10,17 @@
 ![gitHub commit activity](https://img.shields.io/github/commit-activity/m/osapi-io/nats-server?style=for-the-badge)
 [![go reference](https://img.shields.io/badge/go-reference-00ADD8?style=for-the-badge&logo=go&logoColor=white)](https://pkg.go.dev/github.com/osapi-io/nats-server/pkg/server)
 
-# NATS Server
+# NATS server
 
 A Go package for running an embedded NATS server.
 
-## 📦 Install
+## Install
 
 ```bash
 go get github.com/osapi-io/nats-server
 ```
 
-## ✨ Features
+## Features
 
 See the [server docs](docs/server/README.md) for quick start, authentication,
 and per-feature reference.
@@ -31,7 +31,7 @@ and per-feature reference.
 | slog integration     | Adapts `slog.Logger` to the NATS server logging interface | [docs](docs/server/logging.md)       | [`logger.go`](pkg/server/logger.go) |
 | Configuration        | Options for host, port, store dir, auth, and timeouts     | [docs](docs/server/configuration.md) | [`types.go`](pkg/server/types.go)   |
 
-## 📋 Examples
+## Examples
 
 Each example is a standalone Go program you can read and run.
 
@@ -42,16 +42,16 @@ Each example is a standalone Go program you can read and run.
 | [auth-nkeys](examples/auth-nkeys/main.go)         | Server with NKey authentication       |
 | [simple-server](examples/simple-server/main.go)   | Minimal server startup and shutdown   |
 
-## 📖 Documentation
+## Documentation
 
 See the [package documentation] on pkg.go.dev for API details.
 
-## 🤝 Contributing
+## Contributing
 
 See the [Contributing](CONTRIBUTING.md) guide for prerequisites, setup,
 conventions, and the PR workflow.
 
-## 📄 License
+## License
 
 The [MIT] License.
 

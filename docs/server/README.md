@@ -1,10 +1,10 @@
-# NATS Server
+# NATS server
 
 The `server` package provides an embedded NATS server with JetStream support,
 slog-based logging, and configurable options. Create a server with `New()` and
 call `Start()` to run it.
 
-## Quick Start
+## Quick start
 
 ```go
 s := server.New(logger, &server.Options{
