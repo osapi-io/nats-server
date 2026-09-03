@@ -1,4 +1,4 @@
-# No Authentication
+# No authentication
 
 An example NATS server without Auth.
 

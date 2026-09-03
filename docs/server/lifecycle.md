@@ -1,4 +1,4 @@
-# Lifecycle Management
+# Lifecycle management
 
 Non-blocking server startup with graceful shutdown.
 

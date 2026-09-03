@@ -1,4 +1,4 @@
-# Simple Server
+# Simple server
 
 An example simple NATS server.
 

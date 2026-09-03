@@ -10,7 +10,7 @@
 ![gitHub commit activity](https://img.shields.io/github/commit-activity/m/osapi-io/nats-server?style=for-the-badge)
 [![go reference](https://img.shields.io/badge/go-reference-00ADD8?style=for-the-badge&logo=go&logoColor=white)](https://pkg.go.dev/github.com/osapi-io/nats-server/pkg/server)
 
-# NATS Server
+# NATS server
 
 A Go package for running an embedded NATS server.
 
