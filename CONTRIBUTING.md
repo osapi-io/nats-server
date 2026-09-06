@@ -65,6 +65,18 @@ just fetch
 just deps
 ```
 
+## Project structure
+
+- **`pkg/server/`.** Public SDK. The only package consumers import.
+  - `types.go`. `Server`, `Options`. Type declarations only.
+  - `server.go`. `New()`, `Start()`, `Stop()`.
+  - `server_wrapper.go`. `NATSServerInstance`, the seam over the embedded NATS
+    server that lets tests substitute it.
+  - `logger.go`. `SlogWrapper`, adapting `slog` to the embedded server's logger
+    interface.
+  - `mocks/`. Generated mocks. See [Test doubles](#test-doubles).
+- **`examples/`.** Runnable programs, one per auth mode.
+
 ## Code style
 
 Go code is formatted by [gofumpt] and linted using [golangci-lint], enforced by
@@ -187,6 +199,12 @@ Three doubles are written by hand, because generating them buys nothing:
 - A recorder for a dependency called from a goroutine the test cannot join,
   where a generated mock would assert a call count at a moment the test cannot
   establish. State that reason where the recorder is defined.
+
+### File headers
+
+Every `.go` file MUST start with the MIT license header. See any existing Go
+file in the repo for the exact format. Build-tagged files put `//go:build` on
+line 1, blank line, then the header.
 
 ## Testing
 
