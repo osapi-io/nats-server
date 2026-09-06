@@ -63,21 +63,47 @@ func (s *ServerPublicTestSuite) TearDownTest() {
 }
 
 func (s *ServerPublicTestSuite) TestNew() {
-	opts := &server.Options{
-		Options:      &natsserver.Options{Host: "localhost", Port: 4222},
-		ReadyTimeout: 10 * time.Second,
+	tests := []struct {
+		name         string
+		opts         *server.Options
+		validateFunc func(*server.Server, *server.Options)
+	}{
+		{
+			name: "keeps the options it was given",
+			opts: &server.Options{
+				Options:      &natsserver.Options{Host: "localhost", Port: 4222},
+				ReadyTimeout: 10 * time.Second,
+			},
+			validateFunc: func(srv *server.Server, opts *server.Options) {
+				s.NotNil(srv)
+				s.Equal(opts, srv.Opts)
+			},
+		},
+		{
+			name: "accepts options with a zero-value embedded config",
+			opts: &server.Options{
+				Options: &natsserver.Options{},
+			},
+			validateFunc: func(srv *server.Server, opts *server.Options) {
+				s.NotNil(srv)
+				s.Equal(opts, srv.Opts)
+				s.Zero(srv.Opts.ReadyTimeout)
+			},
+		},
 	}
-	srv := server.New(s.logger, opts)
 
-	s.NotNil(srv)
-	s.Equal(opts, srv.Opts)
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			tc.validateFunc(server.New(s.logger, tc.opts), tc.opts)
+		})
+	}
 }
 
 func (s *ServerPublicTestSuite) TestStart() {
 	tests := []struct {
-		name        string
-		mockSetup   func()
-		expectedErr string
+		name         string
+		mockSetup    func()
+		validateFunc func(error)
 	}{
 		{
 			name: "successfully starts server",
@@ -96,7 +122,9 @@ func (s *ServerPublicTestSuite) TestStart() {
 					SetLogger(gomock.Any(), true, true).
 					Times(1)
 			},
-			expectedErr: "",
+			validateFunc: func(err error) {
+				s.NoError(err)
+			},
 		},
 		{
 			name: "returns error when NewServer fails",
@@ -107,7 +135,9 @@ func (s *ServerPublicTestSuite) TestStart() {
 					return nil, errors.New("invalid options")
 				}
 			},
-			expectedErr: "error starting server: invalid options",
+			validateFunc: func(err error) {
+				s.EqualError(err, "error starting server: invalid options")
+			},
 		},
 		{
 			name: "returns error when not ready for connections",
@@ -123,7 +153,9 @@ func (s *ServerPublicTestSuite) TestStart() {
 					Return(false).
 					Times(1)
 			},
-			expectedErr: "server not ready for connections",
+			validateFunc: func(err error) {
+				s.EqualError(err, "server not ready for connections")
+			},
 		},
 	}
 
@@ -134,22 +166,16 @@ func (s *ServerPublicTestSuite) TestStart() {
 
 			tc.mockSetup()
 
-			err := s.srv.Start()
-
-			if tc.expectedErr == "" {
-				s.NoError(err)
-			} else {
-				s.EqualError(err, tc.expectedErr)
-			}
+			tc.validateFunc(s.srv.Start())
 		})
 	}
 }
 
 func (s *ServerPublicTestSuite) TestStop() {
 	tests := []struct {
-		name      string
-		setup     func()
-		expectErr bool
+		name         string
+		setup        func()
+		validateFunc func()
 	}{
 		{
 			name: "stops running server",
@@ -168,11 +194,19 @@ func (s *ServerPublicTestSuite) TestStop() {
 					SetLogger(gomock.Any(), true, true).
 					Times(1)
 				s.mockNATSServer.EXPECT().Shutdown().Times(1)
+
+				s.Require().NoError(s.srv.Start())
+			},
+			validateFunc: func() {
+				s.NotPanics(s.srv.Stop)
 			},
 		},
 		{
 			name:  "handles nil server gracefully",
 			setup: func() {},
+			validateFunc: func() {
+				s.NotPanics(s.srv.Stop)
+			},
 		},
 	}
 
@@ -183,14 +217,7 @@ func (s *ServerPublicTestSuite) TestStop() {
 
 			tc.setup()
 
-			if tc.name == "stops running server" {
-				err := s.srv.Start()
-				s.NoError(err)
-			}
-
-			s.NotPanics(func() {
-				s.srv.Stop()
-			})
+			tc.validateFunc()
 		})
 	}
 }

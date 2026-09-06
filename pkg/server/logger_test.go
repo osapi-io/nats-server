@@ -62,25 +62,25 @@ func (h *testHandler) WithGroup(
 	return h
 }
 
-type SlogWrapperTestSuite struct {
+type LoggerTestSuite struct {
 	suite.Suite
 
 	handler *testHandler
 	wrapper *SlogWrapper
 }
 
-func (s *SlogWrapperTestSuite) SetupTest() {
+func (s *LoggerTestSuite) SetupTest() {
 	s.handler = &testHandler{}
 	s.wrapper = &SlogWrapper{
 		logger: slog.New(s.handler),
 	}
 }
 
-func (s *SlogWrapperTestSuite) SetupSubTest() {
+func (s *LoggerTestSuite) SetupSubTest() {
 	s.SetupTest()
 }
 
-func (s *SlogWrapperTestSuite) TestLogMethods() {
+func (s *LoggerTestSuite) TestLogMethods() {
 	tests := []struct {
 		name          string
 		call          func()
@@ -141,6 +141,6 @@ func (s *SlogWrapperTestSuite) TestLogMethods() {
 	}
 }
 
-func TestSlogWrapperTestSuite(t *testing.T) {
-	suite.Run(t, new(SlogWrapperTestSuite))
+func TestLoggerTestSuite(t *testing.T) {
+	suite.Run(t, new(LoggerTestSuite))
 }
