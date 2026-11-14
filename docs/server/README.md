@@ -1,8 +1,8 @@
 # NATS server
 
-The `server` package provides an embedded NATS server with JetStream support,
-slog-based logging, and configurable options. Create a server with `New()` and
-call `Start()` to run it.
+The `server` package gives an embedded NATS server. The server has JetStream,
+slog logging, and options that you can configure. Make a server with `New()`.
+Call `Start()` to run it.
 
 ## Quick start
 
@@ -25,15 +25,15 @@ defer s.Stop()
 
 ## Features
 
-| Feature                             | Description                                  | Source      |
-| ----------------------------------- | -------------------------------------------- | ----------- |
-| [`Lifecycle`](lifecycle.md)         | Non-blocking Start/Stop with readiness check | `server.go` |
-| [`Logging`](logging.md)             | slog adapter for the NATS Logger interface   | `logger.go` |
-| [`Configuration`](configuration.md) | Options struct extending nats-server options | `types.go`  |
+| Feature                             | Description                                            | Source      |
+| ----------------------------------- | ------------------------------------------------------ | ----------- |
+| [`Lifecycle`](lifecycle.md)         | Start and Stop, with a readiness check                 | `server.go` |
+| [`Logging`](logging.md)             | Connects slog to the NATS `Logger` interface           | `logger.go` |
+| [`Configuration`](configuration.md) | An `Options` struct that adds to nats-server's options | `types.go`  |
 
 ## Authentication
 
-Pass authentication options through `natsserver.Options`:
+Give the authentication options in `natsserver.Options`:
 
 | Type          | Description              | Options field |
 | ------------- | ------------------------ | ------------- |

@@ -1,10 +1,10 @@
 # Authenticating with an NKey
 
-An example NATS server using [NKey Auth].
+An example NATS server that uses [NKey Auth].
 
 ## Setup
 
-Create a user NKEY for two micro-services.
+Make a user NKey for each of two services.
 
 ```bash
 $ nk -gen user -pubout > .nkeys/service1.nk
@@ -19,18 +19,17 @@ Start the server:
 $ go run main.go
 ```
 
+> **Important:** Configure a system account in the NATS server before you do
+> this query. Without a system account, system queries such as
+> `nats server info` do not work. This is also true with NKey authentication.
+
 Query the server with the system user:
 
 ```bash
 $ nats server info --user system --password systempassword
 ```
 
-> **Important:** This will only work if a **system account is configured** in
-> the NATS server. Without a properly configured system account, system-level
-> queries like `nats server info` will not be available, even when using NKEYS
-> authentication.
-
-Subscribe and Publish a message:
+Subscribe to a subject and publish a message to it:
 
 ```bash
 $ PIN=$(date +"%Y%m%d%H%M%S")

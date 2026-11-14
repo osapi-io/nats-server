@@ -1,6 +1,6 @@
 # Simple server
 
-An example simple NATS server.
+An example of a simple NATS server.
 
 ## Usage
 
@@ -10,7 +10,7 @@ Start the server:
 $ go run main.go
 ```
 
-Subscribe and Publish a message:
+Subscribe to a subject and publish a message to it:
 
 ```bash
 $ PIN=$(date +"%Y%m%d%H%M%S")

@@ -1,13 +1,14 @@
 # slog integration
 
-Adapts Go's `slog.Logger` to the NATS server `Logger` interface, bridging
-structured logging with NATS's printf-style log calls.
+`SlogWrapper` connects Go's `slog.Logger` to the `Logger` interface of the NATS
+server. The NATS server makes printf-style log calls. The wrapper sends them to
+slog, which makes structured logs.
 
 ## Type
 
-| Type          | Description                                     |
-| ------------- | ----------------------------------------------- |
-| `SlogWrapper` | Implements NATS `Logger` interface using `slog` |
+| Type          | Description                                        |
+| ------------- | -------------------------------------------------- |
+| `SlogWrapper` | Implements the NATS `Logger` interface with `slog` |
 
 ## Methods
 
@@ -20,5 +21,5 @@ structured logging with NATS's printf-style log calls.
 | `Debugf()`  | `slog.Debug()` |
 | `Tracef()`  | `slog.Debug()` |
 
-The wrapper uses `fmt.Sprintf` to format NATS's printf-style messages before
-passing them to slog's structured logging methods.
+The wrapper formats each printf-style message from NATS with `fmt.Sprintf`. Then
+it gives the message to the slog method in the table.

@@ -1,6 +1,6 @@
 # Authenticating with a user and password
 
-An example NATS server using [User and Password Auth].
+An example NATS server that uses [User and Password Auth].
 
 ## Usage
 
@@ -16,7 +16,7 @@ Query the server with the system user:
 $ nats server info --user system --password systempassword
 ```
 
-Subscribe and Publish a message:
+Subscribe to a subject and publish a message to it:
 
 ```bash
 $ PIN=$(date +"%Y%m%d%H%M%S")

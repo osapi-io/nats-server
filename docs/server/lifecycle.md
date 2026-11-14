@@ -1,13 +1,14 @@
 # Lifecycle management
 
-Non-blocking server startup with graceful shutdown.
+`Start()` returns when the server is ready for connections. `Stop()` shuts down
+the server gracefully.
 
 ## Methods
 
-| Method    | Description                                        |
-| --------- | -------------------------------------------------- |
-| `Start()` | Start the embedded NATS server, wait for readiness |
-| `Stop()`  | Gracefully shut down the NATS server               |
+| Method    | Description                                                 |
+| --------- | ----------------------------------------------------------- |
+| `Start()` | Starts the embedded NATS server and waits until it is ready |
+| `Stop()`  | Shuts down the NATS server gracefully                       |
 
 ## Usage
 
@@ -28,6 +29,10 @@ if err := s.Start(); err != nil {
 defer s.Stop()
 ```
 
-`Start()` launches the NATS server in a goroutine, waits for it to be ready for
-connections (up to `ReadyTimeout`), then configures slog-based logging. `Stop()`
-calls `Shutdown()` on the underlying NATS server for graceful cleanup.
+`Start()` starts the NATS server in a goroutine. Then it waits until the server
+is ready for connections. It waits no longer than `ReadyTimeout`. If the server
+is not ready in that time, `Start()` returns an error. When the server is ready,
+`Start()` sets the slog logger on it.
+
+`Stop()` calls `Shutdown()` on the NATS server. The NATS server then closes its
+connections and stops.
