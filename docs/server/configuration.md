@@ -1,20 +1,20 @@
 # Configuration
 
-Server options extend `natsserver.Options` with additional fields.
+The server options add fields to `natsserver.Options`.
 
 ## Types
 
-| Type      | Description                                      |
-| --------- | ------------------------------------------------ |
-| `Server`  | Embedded NATS server with slog logging           |
-| `Options` | Extends `natsserver.Options` with `ReadyTimeout` |
+| Type      | Description                                 |
+| --------- | ------------------------------------------- |
+| `Server`  | The embedded NATS server, with slog logging |
+| `Options` | Adds `ReadyTimeout` to `natsserver.Options` |
 
 ## Options
 
-| Field          | Type            | Description                                     |
-| -------------- | --------------- | ----------------------------------------------- |
-| `Options`      | `*nats.Options` | Standard NATS server options (host, port, auth) |
-| `ReadyTimeout` | `time.Duration` | Max wait time for server readiness after start  |
+| Field          | Type            | Description                                                          |
+| -------------- | --------------- | -------------------------------------------------------------------- |
+| `Options`      | `*nats.Options` | The standard NATS server options: host, port, auth                   |
+| `ReadyTimeout` | `time.Duration` | The maximum time that `Start()` waits for the server to become ready |
 
 ## Usage
 

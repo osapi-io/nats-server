@@ -26,9 +26,9 @@
 </p>
 
 <p align="center">
-Run a NATS server inside your own process with JetStream support and slog
-logging. No daemon to install and no broker to operate: the server is a
-goroutine in the program that starts it.
+Run a NATS server in your own process, with JetStream and slog logging. You do
+not install a daemon or operate a broker. The server is a goroutine in the
+program that starts it.
 </p>
 
 ## Install
@@ -39,34 +39,34 @@ go get github.com/osapi-io/nats-server
 
 ## Features
 
-See the [server docs](docs/server/README.md) for quick start, authentication,
-and per-feature reference.
+The [server docs](docs/server/README.md) give a quick start, the authentication
+modes, and a reference page for each feature.
 
-| Feature              | Description                                               | Docs                                 | Source                              |
-| -------------------- | --------------------------------------------------------- | ------------------------------------ | ----------------------------------- |
-| Lifecycle management | Non-blocking `Start()` / graceful `Stop()` with readiness | [docs](docs/server/lifecycle.md)     | [`server.go`](pkg/server/server.go) |
-| slog integration     | Adapts `slog.Logger` to the NATS server logging interface | [docs](docs/server/logging.md)       | [`logger.go`](pkg/server/logger.go) |
-| Configuration        | Options for host, port, store dir, auth, and timeouts     | [docs](docs/server/configuration.md) | [`types.go`](pkg/server/types.go)   |
+| Feature              | Description                                                                | Docs                                 | Source                              |
+| -------------------- | -------------------------------------------------------------------------- | ------------------------------------ | ----------------------------------- |
+| Lifecycle management | `Start()` returns when the server is ready. `Stop()` shuts down the server | [docs](docs/server/lifecycle.md)     | [`server.go`](pkg/server/server.go) |
+| slog integration     | Connects `slog.Logger` to the logger interface of the NATS server          | [docs](docs/server/logging.md)       | [`logger.go`](pkg/server/logger.go) |
+| Configuration        | Options for the host, the port, the store directory, auth and timeouts     | [docs](docs/server/configuration.md) | [`types.go`](pkg/server/types.go)   |
 
 ## Examples
 
-Each example is a standalone Go program you can read and run.
+Each example is a standalone Go program. You can read it and run it.
 
 | Example                                           | What it shows                         |
 | ------------------------------------------------- | ------------------------------------- |
 | [auth-none](examples/auth-none/main.go)           | Start a server without authentication |
-| [auth-user-pass](examples/auth-user-pass/main.go) | Server with username/password auth    |
-| [auth-nkeys](examples/auth-nkeys/main.go)         | Server with NKey authentication       |
-| [simple-server](examples/simple-server/main.go)   | Minimal server startup and shutdown   |
+| [auth-user-pass](examples/auth-user-pass/main.go) | A server with username/password auth  |
+| [auth-nkeys](examples/auth-nkeys/main.go)         | A server with NKey authentication     |
+| [simple-server](examples/simple-server/main.go)   | Start and stop a minimal server       |
 
 ## Documentation
 
-- [Package documentation] on pkg.go.dev. API reference.
+- [Package documentation] on pkg.go.dev. It is the API reference.
 
 ## Contributing
 
-See the [Contributing](CONTRIBUTING.md) guide for prerequisites, setup,
-conventions, and the PR workflow.
+The [Contributing](CONTRIBUTING.md) guide gives the prerequisites, the setup,
+the conventions and the pull request workflow.
 
 ## License
 
