@@ -6,7 +6,7 @@
   </picture>
 </p>
 
-<p align="center">A Go package for running an embedded NATS server.</p>
+<p align="center">A Go package that runs an embedded NATS server.</p>
 
 <p align="center">
   <a href="https://github.com/osapi-io/nats-server/releases/latest"><img alt="release" src="https://img.shields.io/github/release/osapi-io/nats-server.svg?style=for-the-badge"></a>
@@ -26,7 +26,7 @@
 </p>
 
 <p align="center">
-Run a NATS server in your own process, with JetStream and slog logging. You do
+Run a NATS server in your own process, with JetStream and logs through slog. You do
 not install a daemon or operate a broker. The server is a goroutine in the
 program that starts it.
 </p>
@@ -42,22 +42,22 @@ go get github.com/osapi-io/nats-server
 The [server docs](docs/server/README.md) give a quick start, the authentication
 modes, and a reference page for each feature.
 
-| Feature              | Description                                                                | Docs                                 | Source                              |
-| -------------------- | -------------------------------------------------------------------------- | ------------------------------------ | ----------------------------------- |
-| Lifecycle management | `Start()` returns when the server is ready. `Stop()` shuts down the server | [docs](docs/server/lifecycle.md)     | [`server.go`](pkg/server/server.go) |
-| slog integration     | Connects `slog.Logger` to the logger interface of the NATS server          | [docs](docs/server/logging.md)       | [`logger.go`](pkg/server/logger.go) |
-| Configuration        | Options for the host, the port, the store directory, auth and timeouts     | [docs](docs/server/configuration.md) | [`types.go`](pkg/server/types.go)   |
+| Feature              | Description                                                                      | Docs                                 | Source                              |
+| -------------------- | -------------------------------------------------------------------------------- | ------------------------------------ | ----------------------------------- |
+| Lifecycle management | `Start()` returns when the server is ready. `Stop()` stops the server            | [docs](docs/server/lifecycle.md)     | [`server.go`](pkg/server/server.go) |
+| slog integration     | Connects `slog.Logger` to the logger interface of the NATS server                | [docs](docs/server/logging.md)       | [`logger.go`](pkg/server/logger.go) |
+| Configuration        | Options for the host, the port, the store directory, authentication and timeouts | [docs](docs/server/configuration.md) | [`types.go`](pkg/server/types.go)   |
 
 ## Examples
 
 Each example is a standalone Go program. You can read it and run it.
 
-| Example                                           | What it shows                         |
-| ------------------------------------------------- | ------------------------------------- |
-| [auth-none](examples/auth-none/main.go)           | Start a server without authentication |
-| [auth-user-pass](examples/auth-user-pass/main.go) | A server with username/password auth  |
-| [auth-nkeys](examples/auth-nkeys/main.go)         | A server with NKey authentication     |
-| [simple-server](examples/simple-server/main.go)   | Start and stop a minimal server       |
+| Example                                           | What it shows                                      |
+| ------------------------------------------------- | -------------------------------------------------- |
+| [auth-none](examples/auth-none/main.go)           | Start a server without authentication              |
+| [auth-user-pass](examples/auth-user-pass/main.go) | A server with username and password authentication |
+| [auth-nkeys](examples/auth-nkeys/main.go)         | A server with NKey authentication                  |
+| [simple-server](examples/simple-server/main.go)   | Start and stop a minimal server                    |
 
 ## Documentation
 

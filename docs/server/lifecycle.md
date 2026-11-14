@@ -1,14 +1,14 @@
 # Lifecycle management
 
-`Start()` returns when the server is ready for connections. `Stop()` shuts down
-the server gracefully.
+`Start()` returns when the server is ready for connections. `Stop()` closes the
+connections of the server and stops it.
 
 ## Methods
 
 | Method    | Description                                                 |
 | --------- | ----------------------------------------------------------- |
 | `Start()` | Starts the embedded NATS server and waits until it is ready |
-| `Stop()`  | Shuts down the NATS server gracefully                       |
+| `Stop()`  | Closes the connections and stops the NATS server            |
 
 ## Usage
 
