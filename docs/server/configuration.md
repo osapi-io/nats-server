@@ -13,7 +13,7 @@ The server options add fields to `natsserver.Options`.
 
 | Field          | Type            | Description                                                          |
 | -------------- | --------------- | -------------------------------------------------------------------- |
-| `Options`      | `*nats.Options` | The standard NATS server options: host, port, auth                   |
+| `Options`      | `*nats.Options` | The standard NATS server options: host, port, authentication         |
 | `ReadyTimeout` | `time.Duration` | The maximum time that `Start()` waits for the server to become ready |
 
 ## Usage

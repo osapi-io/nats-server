@@ -10,7 +10,7 @@ Start the server:
 $ go run main.go
 ```
 
-Subscribe to a subject and publish a message to it:
+Subscribe to a subject. Then publish a message to it:
 
 ```bash
 $ PIN=$(date +"%Y%m%d%H%M%S")

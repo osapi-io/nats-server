@@ -8,5 +8,5 @@ contributors are in [CONTRIBUTING.md](../CONTRIBUTING.md).
 | -------------------------------------------------- | -------------------------------------------- |
 | [server/README.md](server/README.md)               | Package overview and quick start             |
 | [server/configuration.md](server/configuration.md) | Options, JetStream, and authentication modes |
-| [server/lifecycle.md](server/lifecycle.md)         | Start, readiness, and shutdown               |
+| [server/lifecycle.md](server/lifecycle.md)         | Start, the readiness check, and stop         |
 | [server/logging.md](server/logging.md)             | slog integration and log levels              |
