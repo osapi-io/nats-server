@@ -20,7 +20,7 @@ Query the server with the system user:
 $ nats server info --user system --password systempassword
 ```
 
-Subscribe to a subject and publish a message to it:
+Subscribe to a subject. Then publish a message to it:
 
 ```bash
 $ PIN=$(date +"%Y%m%d%H%M%S")
