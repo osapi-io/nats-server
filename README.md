@@ -31,13 +31,13 @@ not install a daemon or operate a broker. The server is a goroutine in the
 program that starts it.
 </p>
 
-## Install
+## 📦 Install
 
 ```bash
 go get github.com/osapi-io/nats-server
 ```
 
-## Features
+## ✨ Features
 
 The [server docs](docs/server/README.md) give a quick start, the authentication
 modes, and a reference page for each feature.
@@ -48,7 +48,7 @@ modes, and a reference page for each feature.
 | slog integration     | Connects `slog.Logger` to the logger interface of the NATS server                | [docs](docs/server/logging.md)       | [`logger.go`](pkg/server/logger.go) |
 | Configuration        | Options for the host, the port, the store directory, authentication and timeouts | [docs](docs/server/configuration.md) | [`types.go`](pkg/server/types.go)   |
 
-## Examples
+## 🧪 Examples
 
 Each example is a standalone Go program. You can read it and run it.
 
@@ -59,16 +59,16 @@ Each example is a standalone Go program. You can read it and run it.
 | [auth-nkeys](examples/auth-nkeys/main.go)         | A server with NKey authentication                  |
 | [simple-server](examples/simple-server/main.go)   | Start and stop a minimal server                    |
 
-## Documentation
+## 📚 Documentation
 
 - [Package documentation] on pkg.go.dev. It is the API reference.
 
-## Contributing
+## 🤝 Contributing
 
 The [Contributing](CONTRIBUTING.md) guide gives the prerequisites, the setup,
 the conventions and the pull request workflow.
 
-## License
+## 📄 License
 
 The [MIT] License.
 
