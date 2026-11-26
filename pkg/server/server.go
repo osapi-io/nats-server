@@ -31,12 +31,17 @@ import (
 // connections when Options.ReadyTimeout is zero.
 const DefaultReadyTimeout = 10 * time.Second
 
-// New makes a Server from its logger and options. Start runs it.
+// New makes a Server from its logger and options. Start runs it. A nil
+// logger is slog.Default().
 func New(
 	logger *slog.Logger,
 
 	opts *Options,
 ) *Server {
+	if logger == nil {
+		logger = slog.Default()
+	}
+
 	return &Server{
 		logger: logger,
 		Opts:   opts,
@@ -44,14 +49,20 @@ func New(
 }
 
 // Start runs the embedded NATS server and waits until it accepts
-// connections. It refuses a second Start before Stop. If the server does not
-// become ready, Start shuts it down before it returns the error.
+// connections. It refuses nil options, and a second Start before Stop. It
+// attaches the logger before the server runs, with the Debug and Trace of the
+// options, so the logger also gets the startup messages. If the server does
+// not become ready, Start shuts it down before it returns the error.
 func (s *Server) Start() error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	if s.natsServer != nil {
 		return fmt.Errorf("server already started")
+	}
+
+	if s.Opts == nil || s.Opts.Options == nil {
+		return fmt.Errorf("server options are nil")
 	}
 
 	timeout := s.Opts.ReadyTimeout
@@ -67,6 +78,12 @@ func (s *Server) Start() error {
 		return fmt.Errorf("error starting server: %w", err)
 	}
 
+	natsServer.SetLogger(
+		NewSlogWrapper(s.logger),
+		s.Opts.Debug,
+		s.Opts.Trace,
+	)
+
 	go natsServer.Start()
 
 	if !natsServer.ReadyForConnections(timeout) {
@@ -75,12 +92,6 @@ func (s *Server) Start() error {
 
 		return fmt.Errorf("server not ready for connections")
 	}
-
-	slogWrapper := &SlogWrapper{
-		logger: s.logger,
-	}
-
-	natsServer.SetLogger(slogWrapper, true, true)
 
 	s.logger.Info("nats server started successfully")
 

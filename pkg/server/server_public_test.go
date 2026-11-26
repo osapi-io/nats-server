@@ -21,6 +21,7 @@
 package server_test
 
 import (
+	"bytes"
 	"errors"
 	"log/slog"
 	"net"
@@ -116,7 +117,7 @@ func (s *ServerPublicTestSuite) expectReady() {
 		Return(true).
 		Times(1)
 	s.mockNATSServer.EXPECT().
-		SetLogger(gomock.Any(), true, true).
+		SetLogger(gomock.Any(), false, false).
 		Times(1)
 }
 
@@ -148,7 +149,7 @@ func (s *ServerPublicTestSuite) TestStart() {
 					Return(true).
 					Times(1)
 				s.mockNATSServer.EXPECT().
-					SetLogger(gomock.Any(), true, true).
+					SetLogger(gomock.Any(), false, false).
 					Times(1)
 			},
 			validateFunc: func(err error) {
@@ -182,6 +183,9 @@ func (s *ServerPublicTestSuite) TestStart() {
 			readyTimeout: 5 * time.Second,
 			mockSetup: func() {
 				s.useMock()
+				s.mockNATSServer.EXPECT().
+					SetLogger(gomock.Any(), false, false).
+					Times(1)
 				s.mockNATSServer.EXPECT().Start().AnyTimes()
 				s.mockNATSServer.EXPECT().
 					ReadyForConnections(gomock.Any()).
@@ -207,6 +211,96 @@ func (s *ServerPublicTestSuite) TestStart() {
 			tc.mockSetup()
 
 			tc.validateFunc(s.srv.Start())
+		})
+	}
+}
+
+func (s *ServerPublicTestSuite) TestStartOptions() {
+	tests := []struct {
+		name         string
+		srv          func() *server.Server
+		mockSetup    func()
+		validateFunc func(error)
+	}{
+		{
+			name: "refuses nil options",
+			srv: func() *server.Server {
+				return server.New(s.logger, nil)
+			},
+			mockSetup: func() {},
+			validateFunc: func(err error) {
+				s.EqualError(err, "server options are nil")
+			},
+		},
+		{
+			name: "refuses nil NATS options",
+			srv: func() *server.Server {
+				return server.New(s.logger, &server.Options{})
+			},
+			mockSetup: func() {},
+			validateFunc: func(err error) {
+				s.EqualError(err, "server options are nil")
+			},
+		},
+		{
+			name: "attaches the logger before the server runs, with Debug and Trace",
+			srv: func() *server.Server {
+				return server.New(s.logger, &server.Options{
+					Options: &natsserver.Options{Debug: true, Trace: true},
+				})
+			},
+			mockSetup: func() {
+				s.useMock()
+				gomock.InOrder(
+					s.mockNATSServer.EXPECT().
+						SetLogger(gomock.Any(), true, true).
+						Times(1),
+					s.mockNATSServer.EXPECT().Start().Times(1),
+				)
+				s.mockNATSServer.EXPECT().
+					ReadyForConnections(gomock.Any()).
+					DoAndReturn(func(time.Duration) bool {
+						time.Sleep(50 * time.Millisecond)
+
+						return true
+					}).
+					Times(1)
+				s.mockNATSServer.EXPECT().Shutdown().Times(1)
+				s.mockNATSServer.EXPECT().WaitForShutdown().Times(1)
+			},
+			validateFunc: func(err error) {
+				s.NoError(err)
+			},
+		},
+		{
+			name: "a nil logger is slog.Default",
+			srv: func() *server.Server {
+				return server.New(nil, &server.Options{
+					Options: &natsserver.Options{},
+				})
+			},
+			mockSetup: func() {
+				s.useMock()
+				s.expectReady()
+				s.mockNATSServer.EXPECT().Shutdown().Times(1)
+				s.mockNATSServer.EXPECT().WaitForShutdown().Times(1)
+			},
+			validateFunc: func(err error) {
+				s.NoError(err)
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			originalNewNATSServer := server.NewNATSServer
+			defer func() { server.NewNATSServer = originalNewNATSServer }()
+
+			tc.mockSetup()
+			srv := tc.srv()
+
+			tc.validateFunc(srv.Start())
+			srv.Stop()
 		})
 	}
 }
@@ -254,7 +348,7 @@ func (s *ServerPublicTestSuite) TestStop() {
 					Return(true).
 					Times(2)
 				s.mockNATSServer.EXPECT().
-					SetLogger(gomock.Any(), true, true).
+					SetLogger(gomock.Any(), false, false).
 					Times(2)
 				gomock.InOrder(
 					s.mockNATSServer.EXPECT().Shutdown().Times(1),
@@ -320,15 +414,20 @@ func (s *ServerPublicTestSuite) TestRealServer() {
 			port := free.Addr().(*net.TCPAddr).Port
 			s.Require().NoError(free.Close())
 
-			srv := server.New(s.logger, &server.Options{
-				Options: &natsserver.Options{
-					Host:   "127.0.0.1",
-					Port:   port,
-					NoSigs: true,
+			var buf bytes.Buffer
+			srv := server.New(
+				slog.New(slog.NewTextHandler(&buf, nil)),
+				&server.Options{
+					Options: &natsserver.Options{
+						Host:   "127.0.0.1",
+						Port:   port,
+						NoSigs: true,
+					},
 				},
-			})
+			)
 
 			tc.validateFunc(srv, net.JoinHostPort("127.0.0.1", strconv.Itoa(port)))
+			s.Contains(buf.String(), "Starting nats-server")
 		})
 	}
 }

@@ -34,8 +34,11 @@ is ready for connections. It waits no longer than `ReadyTimeout`. When
 `ReadyTimeout` is zero, it waits `DefaultReadyTimeout`, which is 10 seconds. A
 negative `ReadyTimeout` is an error. If the server is not ready in that time,
 `Start()` shuts the server down, waits until it stops, and returns an error.
-Thus a failed `Start()` leaves no listener and no goroutine. When the server is
-ready, `Start()` sets the slog logger on it.
+Thus a failed `Start()` leaves no listener and no goroutine.
+
+`Start()` sets the slog logger on the server before the server runs. Thus the
+startup messages, such as a port that is in use, go to the logger. `Start()`
+returns an error if the options or the NATS options are nil.
 
 `Start()` returns an error if the server already runs. Call `Stop()` first.
 
