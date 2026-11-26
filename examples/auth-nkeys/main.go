@@ -23,6 +23,9 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
+	"fmt"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -30,20 +33,52 @@ import (
 	"time"
 
 	natsserver "github.com/nats-io/nats-server/v2/server"
+	"github.com/nats-io/nkeys"
 	"github.com/osapi-io/nats-server/pkg/server"
 )
+
+// publicKey reads the seed that `nk -gen user -pubout` wrote on the first line
+// of path, and returns its public key. The README makes the files.
+func publicKey(
+	path string,
+) (string, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return "", fmt.Errorf("read %s, make it as the README says: %w", path, err)
+	}
+
+	line, _, _ := bufio.NewReader(bytes.NewReader(data)).ReadLine()
+	kp, err := nkeys.FromSeed(line)
+	if err != nil {
+		return "", fmt.Errorf("parse the seed in %s: %w", path, err)
+	}
+
+	return kp.PublicKey()
+}
 
 func main() {
 	debug := true
 	trace := debug
 	logger := slog.Default()
 
+	service1, err := publicKey(".nkeys/service1.nk")
+	if err != nil {
+		logger.Error("failed to read the key of service 1", "error", err)
+		os.Exit(1)
+	}
+
+	service2, err := publicKey(".nkeys/service2.nk")
+	if err != nil {
+		logger.Error("failed to read the key of service 2", "error", err)
+		os.Exit(1)
+	}
+
 	nkeyUsers := []*natsserver.NkeyUser{
 		{
-			Nkey: "UAZMBGU3ASBL22E5WW6F3EFAW3CNUGGFRRYI6VRPPOHLNCNJZDTXFOPG", // Service 1
+			Nkey: service1,
 		},
 		{
-			Nkey: "UCL5D5YPOGDRFAS354LW7D3E4S7FOJXZGR3ULHGQFWTFQ3PCRTUAT3ZD", // Service 2 disabled
+			Nkey: service2, // disabled
 			Permissions: &natsserver.Permissions{
 				Publish: &natsserver.SubjectPermission{
 					Allow: []string{},
@@ -69,7 +104,7 @@ func main() {
 	}
 
 	s := server.New(logger, opts)
-	err := s.Start()
+	err = s.Start()
 	if err != nil {
 		logger.Error("failed to start server", "error", err)
 		os.Exit(1)
