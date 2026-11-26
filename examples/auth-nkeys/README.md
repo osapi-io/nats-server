@@ -4,11 +4,14 @@ An example NATS server that uses [NKey Auth].
 
 ## Setup
 
-Make a user NKey for each of two services.
+Make a user NKey for each of two services. Each file has the seed on the first
+line and the public key on the second. The example reads the public keys from
+the files. Git ignores `.nkeys/`, because a seed is a private key.
 
 ```bash
-$ nk -gen user -pubout > .nkeys/service1.nk
-$ nk -gen user -pubout > .nkeys/service2.nk
+$ mkdir -p .nkeys
+$ go tool nk -gen user -pubout > .nkeys/service1.nk
+$ go tool nk -gen user -pubout > .nkeys/service2.nk
 ```
 
 ## Usage
