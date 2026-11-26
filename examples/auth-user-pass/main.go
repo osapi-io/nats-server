@@ -18,6 +18,8 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
+// Package main is an example that starts an embedded NATS server that
+// authenticates clients with a user and a password.
 package main
 
 import (
