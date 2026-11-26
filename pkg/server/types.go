@@ -22,6 +22,7 @@ package server
 
 import (
 	"log/slog"
+	"sync"
 	"time"
 
 	natsserver "github.com/nats-io/nats-server/v2/server"
@@ -29,6 +30,7 @@ import (
 
 // Server provides an embedded NATS server implementation.
 type Server struct {
+	mu         sync.Mutex
 	logger     *slog.Logger
 	natsServer NATSServerInstance
 
@@ -39,5 +41,8 @@ type Server struct {
 // Options extends natsserver.Options to include custom settings.
 type Options struct {
 	*natsserver.Options
+	// ReadyTimeout is the maximum time that Start waits for the server to
+	// accept connections. Zero is DefaultReadyTimeout. A negative value is an
+	// error.
 	ReadyTimeout time.Duration
 }

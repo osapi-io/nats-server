@@ -33,6 +33,7 @@ type NATSServerInstance interface {
 	ReadyForConnections(timeout time.Duration) bool
 	SetLogger(logger natsserver.Logger, debug, trace bool)
 	Shutdown()
+	WaitForShutdown()
 }
 
 // NewNATSServer is a public variable function wrapping natsserver.NewServer.

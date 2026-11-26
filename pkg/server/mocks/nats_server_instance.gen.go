@@ -90,3 +90,15 @@ func (mr *MockNATSServerInstanceMockRecorder) Start() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Start", reflect.TypeOf((*MockNATSServerInstance)(nil).Start))
 }
+
+// WaitForShutdown mocks base method.
+func (m *MockNATSServerInstance) WaitForShutdown() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "WaitForShutdown")
+}
+
+// WaitForShutdown indicates an expected call of WaitForShutdown.
+func (mr *MockNATSServerInstanceMockRecorder) WaitForShutdown() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WaitForShutdown", reflect.TypeOf((*MockNATSServerInstance)(nil).WaitForShutdown))
+}
