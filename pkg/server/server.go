@@ -24,9 +24,14 @@ package server
 import (
 	"fmt"
 	"log/slog"
+	"time"
 )
 
-// New initialize and configure a new Server instance.
+// DefaultReadyTimeout is the time that Start waits for the server to accept
+// connections when Options.ReadyTimeout is zero.
+const DefaultReadyTimeout = 10 * time.Second
+
+// New makes a Server from its logger and options. Start runs it.
 func New(
 	logger *slog.Logger,
 
@@ -38,8 +43,25 @@ func New(
 	}
 }
 
-// Start start the embedded NATS server.
+// Start runs the embedded NATS server and waits until it accepts
+// connections. It refuses a second Start before Stop. If the server does not
+// become ready, Start shuts it down before it returns the error.
 func (s *Server) Start() error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s.natsServer != nil {
+		return fmt.Errorf("server already started")
+	}
+
+	timeout := s.Opts.ReadyTimeout
+	if timeout < 0 {
+		return fmt.Errorf("ready timeout %s is negative", timeout)
+	}
+	if timeout == 0 {
+		timeout = DefaultReadyTimeout
+	}
+
 	natsServer, err := NewNATSServer(s.Opts.Options)
 	if err != nil {
 		return fmt.Errorf("error starting server: %w", err)
@@ -47,8 +69,10 @@ func (s *Server) Start() error {
 
 	go natsServer.Start()
 
-	// Wait for server readiness
-	if !natsServer.ReadyForConnections(s.Opts.ReadyTimeout) {
+	if !natsServer.ReadyForConnections(timeout) {
+		natsServer.Shutdown()
+		natsServer.WaitForShutdown()
+
 		return fmt.Errorf("server not ready for connections")
 	}
 
@@ -65,11 +89,20 @@ func (s *Server) Start() error {
 	return nil
 }
 
-// Stop gracefully stops the embedded NATS server.
+// Stop shuts down the embedded NATS server and waits until it has stopped.
+// A Stop with no running server does nothing. After Stop, Start can run the
+// server again.
 func (s *Server) Stop() {
-	if s.natsServer != nil {
-		s.logger.Info("shutting down nats server")
-		s.natsServer.Shutdown()
-		s.logger.Info("nats server shut down successfully")
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s.natsServer == nil {
+		return
 	}
+
+	s.logger.Info("shutting down nats server")
+	s.natsServer.Shutdown()
+	s.natsServer.WaitForShutdown()
+	s.natsServer = nil
+	s.logger.Info("nats server shut down successfully")
 }
