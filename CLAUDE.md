@@ -1,7 +1,7 @@
 # Claude Code
 
-All the rules for agents are in [AGENTS.md](AGENTS.md). It tells where the rules
-come from. It also gives the commit trailer and the rule for the design pages.
-This file is here so that Claude Code finds that content.
+The guidance for agents is in [AGENTS.md](AGENTS.md). The rules are in the
+[osapi-io constitution](https://github.com/osapi-io/specs/blob/main/CONSTITUTION.md).
+This file exists so that Claude Code finds them.
 
 @AGENTS.md
