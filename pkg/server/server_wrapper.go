@@ -34,6 +34,7 @@ type NATSServerInstance interface {
 	SetLogger(logger natsserver.Logger, debug, trace bool)
 	Shutdown()
 	WaitForShutdown()
+	ClientURL() string
 }
 
 // NewNATSServer is a public variable function wrapping natsserver.NewServer.

@@ -24,6 +24,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"sync"
 )
 
 // SlogWrapper sends the printf-style log calls of the NATS server to an
@@ -107,4 +108,57 @@ func (l *SlogWrapper) Tracef(
 	v ...interface{},
 ) {
 	l.log(slog.LevelDebug, format, v)
+}
+
+// startupLogger is the SlogWrapper that Start gives the NATS server. It also
+// keeps the first fatal message and the last error message, so that Start
+// can return why the server did not start.
+type startupLogger struct {
+	*SlogWrapper
+
+	mu        sync.Mutex
+	firstFail string
+	lastErr   string
+}
+
+// Fatalf logs a fatal message at Error, and keeps the first one.
+func (l *startupLogger) Fatalf(
+	format string,
+	v ...interface{},
+) {
+	l.mu.Lock()
+	if l.firstFail == "" {
+		l.firstFail = fmt.Sprintf(format, v...)
+	}
+	l.mu.Unlock()
+
+	l.SlogWrapper.Fatalf(format, v...)
+}
+
+// Errorf logs an error message at Error, and keeps the last one.
+func (l *startupLogger) Errorf(
+	format string,
+	v ...interface{},
+) {
+	l.mu.Lock()
+	l.lastErr = fmt.Sprintf(format, v...)
+	l.mu.Unlock()
+
+	l.SlogWrapper.Errorf(format, v...)
+}
+
+// fatal is the first fatal message, or empty.
+func (l *startupLogger) fatal() string {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	return l.firstFail
+}
+
+// lastError is the last error message, or empty.
+func (l *startupLogger) lastError() string {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	return l.lastErr
 }

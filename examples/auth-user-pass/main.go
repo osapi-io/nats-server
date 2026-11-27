@@ -23,6 +23,7 @@
 package main
 
 import (
+	"context"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -71,7 +72,7 @@ func main() {
 	}
 
 	s := server.New(logger, opts)
-	err := s.Start()
+	err := s.Start(context.Background())
 	if err != nil {
 		logger.Error("failed to start server", "error", err)
 		os.Exit(1)

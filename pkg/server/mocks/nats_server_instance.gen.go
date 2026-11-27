@@ -41,6 +41,20 @@ func (m *MockNATSServerInstance) EXPECT() *MockNATSServerInstanceMockRecorder {
 	return m.recorder
 }
 
+// ClientURL mocks base method.
+func (m *MockNATSServerInstance) ClientURL() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ClientURL")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// ClientURL indicates an expected call of ClientURL.
+func (mr *MockNATSServerInstanceMockRecorder) ClientURL() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClientURL", reflect.TypeOf((*MockNATSServerInstance)(nil).ClientURL))
+}
+
 // ReadyForConnections mocks base method.
 func (m *MockNATSServerInstance) ReadyForConnections(timeout time.Duration) bool {
 	m.ctrl.T.Helper()

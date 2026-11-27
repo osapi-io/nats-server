@@ -22,6 +22,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"time"
@@ -48,26 +49,68 @@ func New(
 	}
 }
 
+// readyPoll is the time that Start waits for readiness at each try, between
+// checks of a fatal startup error, ctx and Stop. Tests change it.
+var readyPoll = 50 * time.Millisecond
+
 // Start runs the embedded NATS server and waits until it accepts
-// connections. It refuses nil options, and a second Start before Stop. It
-// attaches the logger before the server runs, with the Debug and Trace of the
-// options, so the logger also gets the startup messages. If the server does
-// not become ready, Start shuts it down before it returns the error.
-func (s *Server) Start() error {
+// connections, until ReadyTimeout passes, or until ctx ends or Stop runs.
+// It refuses nil options, and a second Start before Stop. It attaches the
+// logger before the server runs, with the Debug and Trace of the options.
+// When the server logs a fatal error while it starts, such as a port that
+// is in use, Start returns that error at once. If the server does not
+// become ready, Start shuts it down before it returns the error. Start does
+// not hold the lock while it waits, so Stop can end a Start that waits.
+func (s *Server) Start(
+	ctx context.Context,
+) error {
+	natsServer, timeout, startup, waitCtx, err := s.begin(ctx)
+	if err != nil {
+		return err
+	}
+
+	go natsServer.Start()
+
+	waitErr := waitReady(waitCtx, natsServer, timeout, startup)
+
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	if s.natsServer != nil {
-		return fmt.Errorf("server already started")
+	s.cancelStart = nil
+	if waitErr != nil {
+		natsServer.Shutdown()
+		natsServer.WaitForShutdown()
+		s.starting = false
+
+		return waitErr
+	}
+
+	s.natsServer = natsServer
+	s.starting = false
+	s.log().Info("nats server started successfully")
+
+	return nil
+}
+
+// begin checks the state and the options, makes the server with its
+// logger, and marks the Server as starting, all under the lock.
+func (s *Server) begin(
+	ctx context.Context,
+) (NATSServerInstance, time.Duration, *startupLogger, context.Context, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s.natsServer != nil || s.starting {
+		return nil, 0, nil, nil, fmt.Errorf("server already started")
 	}
 
 	if s.Opts == nil || s.Opts.Options == nil {
-		return fmt.Errorf("server options are nil")
+		return nil, 0, nil, nil, fmt.Errorf("server options are nil")
 	}
 
 	timeout := s.Opts.ReadyTimeout
 	if timeout < 0 {
-		return fmt.Errorf("ready timeout %s is negative", timeout)
+		return nil, 0, nil, nil, fmt.Errorf("ready timeout %s is negative", timeout)
 	}
 	if timeout == 0 {
 		timeout = DefaultReadyTimeout
@@ -75,45 +118,94 @@ func (s *Server) Start() error {
 
 	natsServer, err := NewNATSServer(s.Opts.Options)
 	if err != nil {
-		return fmt.Errorf("error starting server: %w", err)
+		return nil, 0, nil, nil, fmt.Errorf("error starting server: %w", err)
 	}
 
-	natsServer.SetLogger(
-		NewSlogWrapper(s.logger),
-		s.Opts.Debug,
-		s.Opts.Trace,
-	)
+	startup := &startupLogger{SlogWrapper: NewSlogWrapper(s.log())}
+	natsServer.SetLogger(startup, s.Opts.Debug, s.Opts.Trace)
 
-	go natsServer.Start()
+	waitCtx, cancel := context.WithCancel(ctx)
+	s.cancelStart = cancel
+	s.starting = true
 
-	if !natsServer.ReadyForConnections(timeout) {
-		natsServer.Shutdown()
-		natsServer.WaitForShutdown()
+	return natsServer, timeout, startup, waitCtx, nil
+}
 
-		return fmt.Errorf("server not ready for connections")
+// waitReady waits until natsServer accepts connections. It returns the
+// fatal error that the server logged, ctx's error, or a timeout error.
+func waitReady(
+	ctx context.Context,
+	natsServer NATSServerInstance,
+	timeout time.Duration,
+	startup *startupLogger,
+) error {
+	deadline := time.Now().Add(timeout)
+
+	for {
+		if natsServer.ReadyForConnections(min(readyPoll, max(time.Until(deadline), 0))) {
+			return nil
+		}
+
+		if cause := startup.fatal(); cause != "" {
+			return fmt.Errorf("server did not start: %s", cause)
+		}
+
+		if err := ctx.Err(); err != nil {
+			return fmt.Errorf("server start stopped: %w", err)
+		}
+
+		if !time.Now().Before(deadline) {
+			if last := startup.lastError(); last != "" {
+				return fmt.Errorf("server not ready for connections after %s: %s", timeout, last)
+			}
+
+			return fmt.Errorf("server not ready for connections after %s", timeout)
+		}
 	}
-
-	s.logger.Info("nats server started successfully")
-
-	s.natsServer = natsServer
-
-	return nil
 }
 
 // Stop shuts down the embedded NATS server and waits until it has stopped.
-// A Stop with no running server does nothing. After Stop, Start can run the
-// server again.
+// It also ends a Start that waits. A Stop with no running server does
+// nothing. After Stop, Start can run the server again.
 func (s *Server) Stop() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+
+	if s.cancelStart != nil {
+		s.cancelStart()
+	}
 
 	if s.natsServer == nil {
 		return
 	}
 
-	s.logger.Info("shutting down nats server")
+	s.log().Info("shutting down nats server")
 	s.natsServer.Shutdown()
 	s.natsServer.WaitForShutdown()
 	s.natsServer = nil
-	s.logger.Info("nats server shut down successfully")
+	s.log().Info("nats server shut down successfully")
+}
+
+// ClientURL is the URL that a client connects to, with the port that the
+// server listens on, also when Options.Port is -1. It is empty when the
+// server does not run.
+func (s *Server) ClientURL() string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s.natsServer == nil {
+		return ""
+	}
+
+	return s.natsServer.ClientURL()
+}
+
+// log is the Server's logger, or slog.Default() for a Server that New did
+// not make.
+func (s *Server) log() *slog.Logger {
+	if s.logger == nil {
+		return slog.Default()
+	}
+
+	return s.logger
 }
