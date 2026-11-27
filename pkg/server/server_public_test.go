@@ -22,11 +22,13 @@ package server_test
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"log/slog"
 	"net"
 	"os"
 	"strconv"
+	"sync"
 	"testing"
 	"time"
 
@@ -121,6 +123,49 @@ func (s *ServerPublicTestSuite) expectReady() {
 		Times(1)
 }
 
+// expectNotReady makes the mock never ready. Each try waits its timeout,
+// and the first one calls logs, if set, with the logger that Start gave
+// the server. The channel closes when Start waits.
+func (s *ServerPublicTestSuite) expectNotReady(
+	logs func(natsserver.Logger),
+) <-chan struct{} {
+	var (
+		logger natsserver.Logger
+		once   sync.Once
+	)
+	waiting := make(chan struct{})
+
+	s.mockNATSServer.EXPECT().
+		SetLogger(gomock.Any(), false, false).
+		Do(func(l natsserver.Logger, _, _ bool) { logger = l }).
+		Times(1)
+	s.mockNATSServer.EXPECT().Start().AnyTimes()
+	s.mockNATSServer.EXPECT().
+		ReadyForConnections(gomock.Any()).
+		DoAndReturn(func(d time.Duration) bool {
+			once.Do(func() {
+				if logs != nil {
+					logs(logger)
+				}
+				close(waiting)
+			})
+			time.Sleep(d)
+
+			return false
+		}).
+		AnyTimes()
+
+	return waiting
+}
+
+// expectShutdown expects one Shutdown, then one WaitForShutdown.
+func (s *ServerPublicTestSuite) expectShutdown() {
+	gomock.InOrder(
+		s.mockNATSServer.EXPECT().Shutdown().Times(1),
+		s.mockNATSServer.EXPECT().WaitForShutdown().Times(1),
+	)
+}
+
 func (s *ServerPublicTestSuite) TestStart() {
 	tests := []struct {
 		name         string
@@ -143,10 +188,17 @@ func (s *ServerPublicTestSuite) TestStart() {
 			name: "waits the default timeout when ReadyTimeout is zero",
 			mockSetup: func() {
 				s.useMock()
+				// With a poll longer than any timeout, the first try waits the
+				// whole timeout, which shows the default.
+				s.T().Cleanup(server.SetReadyPoll(time.Hour))
 				s.mockNATSServer.EXPECT().Start().AnyTimes()
 				s.mockNATSServer.EXPECT().
-					ReadyForConnections(server.DefaultReadyTimeout).
-					Return(true).
+					ReadyForConnections(gomock.Any()).
+					DoAndReturn(func(d time.Duration) bool {
+						s.InDelta(server.DefaultReadyTimeout, d, float64(time.Second))
+
+						return true
+					}).
 					Times(1)
 				s.mockNATSServer.EXPECT().
 					SetLogger(gomock.Any(), false, false).
@@ -180,24 +232,46 @@ func (s *ServerPublicTestSuite) TestStart() {
 		},
 		{
 			name:         "shuts the server down when it is not ready",
-			readyTimeout: 5 * time.Second,
+			readyTimeout: 100 * time.Millisecond,
 			mockSetup: func() {
 				s.useMock()
-				s.mockNATSServer.EXPECT().
-					SetLogger(gomock.Any(), false, false).
-					Times(1)
-				s.mockNATSServer.EXPECT().Start().AnyTimes()
-				s.mockNATSServer.EXPECT().
-					ReadyForConnections(gomock.Any()).
-					Return(false).
-					Times(1)
-				gomock.InOrder(
-					s.mockNATSServer.EXPECT().Shutdown().Times(1),
-					s.mockNATSServer.EXPECT().WaitForShutdown().Times(1),
-				)
+				s.expectNotReady(nil)
+				s.expectShutdown()
 			},
 			validateFunc: func(err error) {
-				s.EqualError(err, "server not ready for connections")
+				s.EqualError(err, "server not ready for connections after 100ms")
+			},
+		},
+		{
+			name:         "returns the fatal error that the server logged at once",
+			readyTimeout: time.Hour,
+			mockSetup: func() {
+				s.useMock()
+				s.expectNotReady(func(l natsserver.Logger) {
+					l.Fatalf("Error listening on port: %s", "127.0.0.1:4222")
+				})
+				s.expectShutdown()
+			},
+			validateFunc: func(err error) {
+				s.EqualError(err, "server did not start: Error listening on port: 127.0.0.1:4222")
+			},
+		},
+		{
+			name:         "names the last error when the server is not ready",
+			readyTimeout: 100 * time.Millisecond,
+			mockSetup: func() {
+				s.useMock()
+				s.expectNotReady(func(l natsserver.Logger) {
+					l.Errorf("first")
+					l.Errorf("the %s one", "last")
+				})
+				s.expectShutdown()
+			},
+			validateFunc: func(err error) {
+				s.EqualError(
+					err,
+					"server not ready for connections after 100ms: the last one",
+				)
 			},
 		},
 	}
@@ -210,7 +284,7 @@ func (s *ServerPublicTestSuite) TestStart() {
 			s.srv.Opts.ReadyTimeout = tc.readyTimeout
 			tc.mockSetup()
 
-			tc.validateFunc(s.srv.Start())
+			tc.validateFunc(s.srv.Start(context.Background()))
 		})
 	}
 }
@@ -299,7 +373,7 @@ func (s *ServerPublicTestSuite) TestStartOptions() {
 			tc.mockSetup()
 			srv := tc.srv()
 
-			tc.validateFunc(srv.Start())
+			tc.validateFunc(srv.Start(context.Background()))
 			srv.Stop()
 		})
 	}
@@ -325,9 +399,9 @@ func (s *ServerPublicTestSuite) TestStartTwice() {
 
 			s.useMock()
 			s.expectReady()
-			s.Require().NoError(s.srv.Start())
+			s.Require().NoError(s.srv.Start(context.Background()))
 
-			tc.validateFunc(s.srv.Start())
+			tc.validateFunc(s.srv.Start(context.Background()))
 		})
 	}
 }
@@ -355,12 +429,12 @@ func (s *ServerPublicTestSuite) TestStop() {
 					s.mockNATSServer.EXPECT().WaitForShutdown().Times(1),
 				)
 
-				s.Require().NoError(s.srv.Start())
+				s.Require().NoError(s.srv.Start(context.Background()))
 			},
 			validateFunc: func() {
 				s.srv.Stop()
 				s.srv.Stop()
-				s.NoError(s.srv.Start())
+				s.NoError(s.srv.Start(context.Background()))
 			},
 		},
 		{
@@ -384,15 +458,132 @@ func (s *ServerPublicTestSuite) TestStop() {
 	}
 }
 
+func (s *ServerPublicTestSuite) TestStartStops() {
+	tests := []struct {
+		name         string
+		run          func(waiting <-chan struct{}) error
+		validateFunc func(error)
+	}{
+		{
+			name: "a ctx that ends stops a Start that waits",
+			run: func(<-chan struct{}) error {
+				ctx, cancel := context.WithCancel(context.Background())
+				cancel()
+
+				return s.srv.Start(ctx)
+			},
+			validateFunc: func(err error) {
+				s.EqualError(err, "server start stopped: context canceled")
+			},
+		},
+		{
+			name: "Stop ends a Start that waits, and a second Start is refused meanwhile",
+			run: func(waiting <-chan struct{}) error {
+				done := make(chan error, 1)
+				go func() { done <- s.srv.Start(context.Background()) }()
+
+				<-waiting
+				s.EqualError(s.srv.Start(context.Background()), "server already started")
+				s.srv.Stop()
+
+				return <-done
+			},
+			validateFunc: func(err error) {
+				s.EqualError(err, "server start stopped: context canceled")
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			originalNewNATSServer := server.NewNATSServer
+			defer func() { server.NewNATSServer = originalNewNATSServer }()
+
+			s.srv.Opts.ReadyTimeout = time.Hour
+			s.useMock()
+			waiting := s.expectNotReady(nil)
+			s.expectShutdown()
+
+			tc.validateFunc(tc.run(waiting))
+		})
+	}
+}
+
+func (s *ServerPublicTestSuite) TestClientURL() {
+	tests := []struct {
+		name         string
+		start        bool
+		validateFunc func(string)
+	}{
+		{
+			name:  "is the running server's URL",
+			start: true,
+			validateFunc: func(url string) {
+				s.Equal("nats://127.0.0.1:4222", url)
+			},
+		},
+		{
+			name: "is empty when the server does not run",
+			validateFunc: func(url string) {
+				s.Empty(url)
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			originalNewNATSServer := server.NewNATSServer
+			defer func() { server.NewNATSServer = originalNewNATSServer }()
+
+			if tc.start {
+				s.useMock()
+				s.expectReady()
+				s.mockNATSServer.EXPECT().ClientURL().Return("nats://127.0.0.1:4222")
+				s.Require().NoError(s.srv.Start(context.Background()))
+			}
+
+			tc.validateFunc(s.srv.ClientURL())
+		})
+	}
+}
+
+func (s *ServerPublicTestSuite) TestZeroServer() {
+	tests := []struct {
+		name string
+	}{
+		{name: "a Server that New did not make logs to slog.Default"},
+	}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			originalNewNATSServer := server.NewNATSServer
+			defer func() { server.NewNATSServer = originalNewNATSServer }()
+
+			s.useMock()
+			s.expectReady()
+			s.expectShutdown()
+			srv := &server.Server{Opts: &server.Options{Options: &natsserver.Options{}}}
+
+			s.NotPanics(func() {
+				s.NoError(srv.Start(context.Background()))
+				srv.Stop()
+			})
+		})
+	}
+}
+
 func (s *ServerPublicTestSuite) TestRealServer() {
 	tests := []struct {
 		name         string
-		validateFunc func(*server.Server, string)
+		port         func() (int, func())
+		readyTimeout time.Duration
+		validateFunc func(*server.Server, string, func() string)
 	}{
 		{
 			name: "starts, accepts a connection, and frees its port on Stop",
-			validateFunc: func(srv *server.Server, addr string) {
-				s.Require().NoError(srv.Start())
+			port: s.freePort,
+			validateFunc: func(srv *server.Server, addr string, logs func() string) {
+				s.Require().NoError(srv.Start(context.Background()))
 
 				conn, err := net.Dial("tcp", addr)
 				s.Require().NoError(err)
@@ -403,33 +594,103 @@ func (s *ServerPublicTestSuite) TestRealServer() {
 				l, err := net.Listen("tcp", addr)
 				s.Require().NoError(err)
 				s.NoError(l.Close())
+				s.Contains(logs(), "Starting nats-server")
+			},
+		},
+		{
+			name: "with port -1, ClientURL is the port that it listens on",
+			port: func() (int, func()) { return -1, func() {} },
+			validateFunc: func(srv *server.Server, _ string, _ func() string) {
+				s.Require().NoError(srv.Start(context.Background()))
+				defer srv.Stop()
+
+				url := srv.ClientURL()
+				s.Require().NotEmpty(url)
+				s.NotContains(url, ":-1")
+
+				conn, err := net.Dial("tcp", url[len("nats://"):])
+				s.Require().NoError(err)
+				s.NoError(conn.Close())
+			},
+		},
+		{
+			name: "a port in use returns the cause at once, not after ReadyTimeout",
+			port: func() (int, func()) {
+				held, err := net.Listen("tcp", "127.0.0.1:0")
+				s.Require().NoError(err)
+
+				return held.Addr().(*net.TCPAddr).Port, func() { s.NoError(held.Close()) }
+			},
+			readyTimeout: time.Minute,
+			validateFunc: func(srv *server.Server, _ string, _ func() string) {
+				begin := time.Now()
+				err := srv.Start(context.Background())
+
+				s.Require().Error(err)
+				s.Contains(err.Error(), "server did not start:")
+				s.Contains(err.Error(), "listening")
+				s.Less(time.Since(begin), 10*time.Second)
+				s.Empty(srv.ClientURL())
 			},
 		},
 	}
 
 	for _, tc := range tests {
 		s.Run(tc.name, func() {
-			free, err := net.Listen("tcp", "127.0.0.1:0")
-			s.Require().NoError(err)
-			port := free.Addr().(*net.TCPAddr).Port
-			s.Require().NoError(free.Close())
+			port, release := tc.port()
+			defer release()
 
-			var buf bytes.Buffer
+			logs := &lockedBuffer{buf: &bytes.Buffer{}}
 			srv := server.New(
-				slog.New(slog.NewTextHandler(&buf, nil)),
+				slog.New(slog.NewTextHandler(logs, nil)),
 				&server.Options{
 					Options: &natsserver.Options{
 						Host:   "127.0.0.1",
 						Port:   port,
 						NoSigs: true,
 					},
+					ReadyTimeout: tc.readyTimeout,
 				},
 			)
 
-			tc.validateFunc(srv, net.JoinHostPort("127.0.0.1", strconv.Itoa(port)))
-			s.Contains(buf.String(), "Starting nats-server")
+			addr := net.JoinHostPort("127.0.0.1", strconv.Itoa(port))
+			tc.validateFunc(srv, addr, logs.String)
 		})
 	}
+}
+
+// freePort is a port that nothing listens on now.
+func (s *ServerPublicTestSuite) freePort() (int, func()) {
+	free, err := net.Listen("tcp", "127.0.0.1:0")
+	s.Require().NoError(err)
+	port := free.Addr().(*net.TCPAddr).Port
+	s.Require().NoError(free.Close())
+
+	return port, func() {}
+}
+
+// lockedBuffer is a bytes.Buffer that the server's goroutines can write to
+// at the same time.
+type lockedBuffer struct {
+	mu  sync.Mutex
+	buf *bytes.Buffer
+}
+
+func (b *lockedBuffer) Write(
+	p []byte,
+) (int, error) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	return b.buf.Write(p)
+}
+
+// String is what the server wrote so far.
+func (b *lockedBuffer) String() string {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	return b.buf.String()
 }
 
 func TestServerPublicTestSuite(t *testing.T) {

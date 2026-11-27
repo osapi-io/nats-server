@@ -17,7 +17,7 @@ s := server.New(logger, &server.Options{
     ReadyTimeout: 5 * time.Second,
 })
 
-if err := s.Start(); err != nil {
+if err := s.Start(context.Background()); err != nil {
     log.Fatal(err)
 }
 defer s.Stop()

@@ -21,6 +21,7 @@
 package server
 
 import (
+	"context"
 	"log/slog"
 	"sync"
 	"time"
@@ -30,9 +31,11 @@ import (
 
 // Server provides an embedded NATS server implementation.
 type Server struct {
-	mu         sync.Mutex
-	logger     *slog.Logger
-	natsServer NATSServerInstance
+	mu          sync.Mutex
+	logger      *slog.Logger
+	natsServer  NATSServerInstance
+	starting    bool
+	cancelStart context.CancelFunc
 
 	// Opts configuration options for the embedded NATS server.
 	Opts *Options

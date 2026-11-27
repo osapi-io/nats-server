@@ -34,6 +34,10 @@ NATS writes debug and trace messages only when `Options.Debug` and
 `Options.Trace` are true. Both are false by default. Trace writes each protocol
 line, so turn it on only to find a fault.
 
+`slog` has no trace level. Thus a trace message goes to `slog.Debug`, and the
+handler can't tell it from a debug message. Trace shows only when the handler
+takes Debug.
+
 ```go
 s := server.New(logger, &server.Options{
     Options: &natsserver.Options{Debug: true, Trace: true},
