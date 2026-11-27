@@ -76,6 +76,12 @@ func (s *LoggerPublicTestSuite) TestLogMethods() {
 			wantLog: "level=INFO msg=\"hello world\"\n",
 		},
 		{
+			name:    "a message with no args keeps a literal percent sign",
+			level:   slog.LevelDebug,
+			call:    func(w *server.SlogWrapper) { w.Noticef("100% ready") },
+			wantLog: "level=INFO msg=\"100% ready\"\n",
+		},
+		{
 			name:    "Warnf logs at Warn level",
 			level:   slog.LevelDebug,
 			call:    func(w *server.SlogWrapper) { w.Warnf("hello %s", "world") },

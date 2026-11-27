@@ -509,6 +509,56 @@ func (s *ServerPublicTestSuite) TestStartStops() {
 	}
 }
 
+func (s *ServerPublicTestSuite) TestStopAsStartBecomesReady() {
+	tests := []struct {
+		name         string
+		validateFunc func(err error)
+	}{
+		{
+			name: "a Stop while the server becomes ready shuts it down",
+			validateFunc: func(err error) {
+				s.EqualError(err, "server start stopped: context canceled")
+				s.Empty(s.srv.ClientURL())
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			originalNewNATSServer := server.NewNATSServer
+			defer func() { server.NewNATSServer = originalNewNATSServer }()
+
+			entered := make(chan struct{})
+			stopped := make(chan struct{})
+
+			s.useMock()
+			s.mockNATSServer.EXPECT().
+				SetLogger(gomock.Any(), false, false).
+				Times(1)
+			s.mockNATSServer.EXPECT().Start().AnyTimes()
+			s.mockNATSServer.EXPECT().
+				ReadyForConnections(gomock.Any()).
+				DoAndReturn(func(time.Duration) bool {
+					close(entered)
+					<-stopped
+
+					return true
+				}).
+				Times(1)
+			s.expectShutdown()
+
+			done := make(chan error, 1)
+			go func() { done <- s.srv.Start(context.Background()) }()
+
+			<-entered
+			s.srv.Stop()
+			close(stopped)
+
+			tc.validateFunc(<-done)
+		})
+	}
+}
+
 func (s *ServerPublicTestSuite) TestClientURL() {
 	tests := []struct {
 		name         string
