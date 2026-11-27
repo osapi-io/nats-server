@@ -61,6 +61,8 @@ var readyPoll = 50 * time.Millisecond
 // is in use, Start returns that error at once. If the server does not
 // become ready, Start shuts it down before it returns the error. Start does
 // not hold the lock while it waits, so Stop can end a Start that waits.
+// ctx bounds only the wait: after Start returns, the server runs until
+// Stop, also when ctx ends.
 func (s *Server) Start(
 	ctx context.Context,
 ) error {
@@ -76,6 +78,15 @@ func (s *Server) Start(
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
+	// A Stop that ran while the server became ready found no server to shut
+	// down, so Start shuts it down here.
+	if waitErr == nil {
+		if err := waitCtx.Err(); err != nil {
+			waitErr = fmt.Errorf("server start stopped: %w", err)
+		}
+	}
+
+	s.cancelStart()
 	s.cancelStart = nil
 	if waitErr != nil {
 		natsServer.Shutdown()

@@ -57,7 +57,12 @@ func (l *SlogWrapper) log(
 		return
 	}
 
-	l.logger.Log(ctx, level, fmt.Sprintf(format, v...))
+	msg := format
+	if len(v) > 0 {
+		msg = fmt.Sprintf(format, v...)
+	}
+
+	l.logger.Log(ctx, level, msg)
 }
 
 // Noticef logs a formatted notice message at Info.
