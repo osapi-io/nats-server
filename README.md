@@ -9,7 +9,7 @@
 <p align="center">A Go package that runs an embedded NATS server.</p>
 
 <p align="center">
-  <a href="https://github.com/osapi-io/nats-server/releases/latest"><img alt="release" src="https://img.shields.io/github/release/osapi-io/nats-server.svg?style=for-the-badge"></a>
+  <a href="https://github.com/osapi-io/nats-server/releases/latest"><img alt="release" src="https://img.shields.io/github/v/release/osapi-io/nats-server?style=for-the-badge"></a>
   <a href="https://codecov.io/gh/osapi-io/nats-server"><img alt="codecov" src="https://img.shields.io/codecov/c/github/osapi-io/nats-server?style=for-the-badge"></a>
   <a href="LICENSE"><img alt="license" src="https://img.shields.io/badge/license-MIT-brightgreen.svg?style=for-the-badge"></a>
   <a href="https://github.com/osapi-io/nats-server/actions/workflows/go.yml"><img alt="build" src="https://img.shields.io/github/actions/workflow/status/osapi-io/nats-server/go.yml?style=for-the-badge"></a>
