@@ -31,6 +31,7 @@ import (
 	"time"
 
 	natsserver "github.com/nats-io/nats-server/v2/server"
+
 	"github.com/osapi-io/nats-server/pkg/server"
 )
 

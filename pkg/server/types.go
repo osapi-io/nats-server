@@ -36,6 +36,7 @@ type Server struct {
 	natsServer  NATSServerInstance
 	starting    bool
 	cancelStart context.CancelFunc
+	startDone   chan struct{}
 
 	// Opts configuration options for the embedded NATS server.
 	Opts *Options
