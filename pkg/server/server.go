@@ -70,6 +70,7 @@ func (s *Server) Start(
 	if err != nil {
 		return err
 	}
+	defer close(s.startDone)
 
 	go natsServer.Start()
 
@@ -112,16 +113,16 @@ func (s *Server) begin(
 	defer s.mu.Unlock()
 
 	if s.natsServer != nil || s.starting {
-		return nil, 0, nil, nil, fmt.Errorf("server already started")
+		return nil, 0, nil, nil, ErrAlreadyStarted
 	}
 
 	if s.Opts == nil || s.Opts.Options == nil {
-		return nil, 0, nil, nil, fmt.Errorf("server options are nil")
+		return nil, 0, nil, nil, ErrNoOptions
 	}
 
 	timeout := s.Opts.ReadyTimeout
 	if timeout < 0 {
-		return nil, 0, nil, nil, fmt.Errorf("ready timeout %s is negative", timeout)
+		return nil, 0, nil, nil, fmt.Errorf("%w: %s", ErrNegativeReadyTimeout, timeout)
 	}
 	if timeout == 0 {
 		timeout = DefaultReadyTimeout
@@ -138,6 +139,7 @@ func (s *Server) begin(
 	waitCtx, cancel := context.WithCancel(ctx)
 	s.cancelStart = cancel
 	s.starting = true
+	s.startDone = make(chan struct{})
 
 	return natsServer, timeout, startup, waitCtx, nil
 }
@@ -176,15 +178,20 @@ func waitReady(
 }
 
 // Stop shuts down the embedded NATS server and waits until it has stopped.
-// It also ends a Start that waits. A Stop with no running server does
-// nothing. After Stop, Start can run the server again.
+// It also ends a Start that waits, and returns only after that Start has
+// shut its server down. A Stop with no running server does nothing. After
+// Stop, Start can run the server again.
 func (s *Server) Stop() {
 	s.mu.Lock()
-	defer s.mu.Unlock()
 
 	if s.cancelStart != nil {
 		s.cancelStart()
+		done := s.startDone
+		s.mu.Unlock()
+		<-done
+		s.mu.Lock()
 	}
+	defer s.mu.Unlock()
 
 	if s.natsServer == nil {
 		return

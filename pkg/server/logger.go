@@ -57,12 +57,20 @@ func (l *SlogWrapper) log(
 		return
 	}
 
-	msg := format
-	if len(v) > 0 {
-		msg = fmt.Sprintf(format, v...)
+	l.logger.Log(ctx, level, message(format, v))
+}
+
+// message is format with v. A format with no v is the message as it is, so
+// that a "%" in it stays as it is.
+func message(
+	format string,
+	v []interface{},
+) string {
+	if len(v) == 0 {
+		return format
 	}
 
-	l.logger.Log(ctx, level, msg)
+	return fmt.Sprintf(format, v...)
 }
 
 // Noticef logs a formatted notice message at Info.
@@ -133,7 +141,7 @@ func (l *startupLogger) Fatalf(
 ) {
 	l.mu.Lock()
 	if l.firstFail == "" {
-		l.firstFail = fmt.Sprintf(format, v...)
+		l.firstFail = message(format, v)
 	}
 	l.mu.Unlock()
 
@@ -146,7 +154,7 @@ func (l *startupLogger) Errorf(
 	v ...interface{},
 ) {
 	l.mu.Lock()
-	l.lastErr = fmt.Sprintf(format, v...)
+	l.lastErr = message(format, v)
 	l.mu.Unlock()
 
 	l.SlogWrapper.Errorf(format, v...)
